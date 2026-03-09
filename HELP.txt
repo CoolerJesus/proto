@@ -1,0 +1,144 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                     AI ASSISTANT v5.0 - INSTALLATION                         ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                              QUICK START                                     │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+STEP 1: Install Python (if not already installed)
+───────────────────────────────────────────────────
+• Download from: https://www.python.org/downloads/
+• IMPORTANT: Check "Add Python to PATH" during installation
+• Minimum version: Python 3.7
+
+STEP 2: Run the Application
+────────────────────────────
+DOUBLE-CLICK: AI_Assistant.bat
+
+Or in Command Prompt:
+---------------------
+python AI_Assistant.py
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                           FEATURES OVERVIEW                                  │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+🎯 CORE AI
+────────────
+• Natural conversation
+• Memory & learning
+• Emotion detection
+• Context awareness
+
+🔢 MATH & UTILITIES
+────────────────────
+• calculate 2+2*3        → 8
+• random 1 100           → Random 1-100
+• convert 100 km to mi    → Distance conversion
+• convert 0 c to f       → Temperature conversion
+
+🌍 LANGUAGE
+────────────
+• translate hello to es  → hola
+• translate thank you to fr → merci
+• detect language hola   → Spanish
+
+🗄️ DATABASE
+────────────
+• db insert {"name":"John","age":25}
+• db find {"name":"John"}
+• db list
+• db count users
+
+🧠 MACHINE LEARNING
+────────────────────
+• init nn 3 5 2         → Create neural network
+• train nn [1,0,1] with [1,0] → Train
+• predict [1,0,1]       → Make prediction
+
+🌤️ WEATHER
+──────────
+• weather London        → Current weather
+• forecast Paris        → 7-day forecast
+
+🔐 CRYPTOGRAPHY
+────────────────
+• md5 password         → MD5 hash
+• sha256 secret        → SHA256 hash
+• uuid                 → Generate UUID
+• base64 encode text   → Base64 encode
+
+💻 CODE
+───────
+• python print('Hello') → Execute Python
+
+📊 ANALYSIS
+──────────
+• sentiment I love this  → positive/negative/neutral
+• currency convert 100 USD to EUR
+
+🎮 OTHER
+────────
+• time                 → Current time
+• date                 → Current date
+• stats                → AI statistics
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                           TROUBLESHOOTING                                     │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+"Python not found" ERROR
+─────────────────────────
+1. Download Python from https://python.org
+2. During install, CHECK "Add Python to PATH"
+3. Restart your computer
+
+Window looks wrong / tiny
+─────────────────────────
+• The window is resizable - drag corners to enlarge
+
+Save/Load not working
+──────────────────────
+• Ensure the folder is writable (not in Program Files)
+• Try running as Administrator
+
+Still not working?
+──────────────────
+• Open Command Prompt (Win+R, type "cmd")
+• Navigate to the folder: cd Desktop
+• Run: python AI_Assistant.py
+• Check for error messages
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                           UI GUIDE                                           │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+The app has 4 tabs:
+
+💬 CHAT
+────────
+Main conversation area. Type commands and press Enter or click Send.
+
+📚 FEATURES
+──────────
+Complete list of all available features.
+
+⚡ QUICK COMMANDS
+─────────────────
+Fast reference for common commands with examples.
+
+ℹ️ ABOUT
+────────
+Application information and credits.
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                           LICENSE                                            │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+AI Assistant v5.0
+Free to use and modify!
