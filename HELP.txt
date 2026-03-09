@@ -1,5 +1,6 @@
 ╔══════════════════════════════════════════════════════════════════════════════╗
-║                     AI ASSISTANT v5.0 - INSTALLATION                         ║
+║                    AI ASSISTANT v6.0 - INSTALLATION                         ║
+║                         WITH REAL API CONNECTIONS                            ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
@@ -16,78 +17,96 @@ STEP 2: Run the Application
 ────────────────────────────
 DOUBLE-CLICK: AI_Assistant.bat
 
-Or in Command Prompt:
----------------------
-python AI_Assistant.py
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                        NEW IN v6.0 - REAL APIS!                             │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+🎉 NOW WITH LIVE DATA CONNECTIONS!
+
+✅ WORKS WITHOUT API KEYS (Free features):
+• 🔍 Wikipedia search - "wiki python"
+• 📖 Wikipedia summaries - "what is AI"
+• 📖 Dictionary definitions - "define happiness"
+• 😂 Random jokes - "joke"
+
+🔑 OPTIONAL API KEYS (For real data):
+• 🌤️ Weather - Get free key at openweathermap.org
+• 📰 News - Get free key at newsapi.org
+
+Set API key in app: Go to "API Settings" tab
 
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │                           FEATURES OVERVIEW                                  │
 └──────────────────────────────────────────────────────────────────────────────┘
 
-🎯 CORE AI
-────────────
-• Natural conversation
-• Memory & learning
-• Emotion detection
-• Context awareness
+🔍 WIKIPEDIA (FREE - No key needed!)
+─────────────────────────────
+• wiki python - Search Wikipedia
+• what is machine learning - Get summary
+
+📖 DICTIONARY (FREE - No key needed!)
+──────────────────────────────────────
+• define happiness - Word definition
+
+😂 JOKES (FREE - No key needed!)
+───────────────────────────────────
+• joke - Random joke
+• joke programming - Programming joke
+
+🌤️ WEATHER
+──────────
+• weather London - Current weather
+• forecast Paris - 5-day forecast
+• Get free API key: openweathermap.org
+
+📰 NEWS
+───────
+• news - Top headlines
+• news technology - Tech news
+• Get free API key: newsapi.org
 
 🔢 MATH & UTILITIES
 ────────────────────
-• calculate 2+2*3        → 8
-• random 1 100           → Random 1-100
-• convert 100 km to mi    → Distance conversion
-• convert 0 c to f       → Temperature conversion
+• calculate 2+2*3
+• random 1 100
+• convert 100 km to mi
+• time / date
 
 🌍 LANGUAGE
 ────────────
-• translate hello to es  → hola
-• translate thank you to fr → merci
-• detect language hola   → Spanish
+• translate hello to es
+• detect language hola
 
 🗄️ DATABASE
 ────────────
-• db insert {"name":"John","age":25}
-• db find {"name":"John"}
+• db insert {"name":"John"}
 • db list
 • db count users
 
 🧠 MACHINE LEARNING
 ────────────────────
-• init nn 3 5 2         → Create neural network
-• train nn [1,0,1] with [1,0] → Train
-• predict [1,0,1]       → Make prediction
-
-🌤️ WEATHER
-──────────
-• weather London        → Current weather
-• forecast Paris        → 7-day forecast
+• init nn 3 5 2
+• train nn [1,0,1] with [1,0]
+• predict [1,0,1]
 
 🔐 CRYPTOGRAPHY
 ────────────────
-• md5 password         → MD5 hash
-• sha256 secret        → SHA256 hash
-• uuid                 → Generate UUID
-• base64 encode text   → Base64 encode
+• md5 password
+• uuid
 
 💻 CODE
 ───────
-• python print('Hello') → Execute Python
+• python print('Hello')
 
 📊 ANALYSIS
 ──────────
-• sentiment I love this  → positive/negative/neutral
-• currency convert 100 USD to EUR
-
-🎮 OTHER
-────────
-• time                 → Current time
-• date                 → Current date
-• stats                → AI statistics
+• sentiment I love this
 
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│                           TROUBLESHOOTING                                     │
+│                           TROUBLESHOOTING                                   │
 └──────────────────────────────────────────────────────────────────────────────┘
 
 "Python not found" ERROR
@@ -96,49 +115,32 @@ python AI_Assistant.py
 2. During install, CHECK "Add Python to PATH"
 3. Restart your computer
 
-Window looks wrong / tiny
-─────────────────────────
+Window looks wrong
+──────────────────
 • The window is resizable - drag corners to enlarge
 
-Save/Load not working
-──────────────────────
-• Ensure the folder is writable (not in Program Files)
-• Try running as Administrator
-
-Still not working?
-──────────────────
-• Open Command Prompt (Win+R, type "cmd")
-• Navigate to the folder: cd Desktop
-• Run: python AI_Assistant.py
-• Check for error messages
+API keys not working?
+─────────────────────
+• Make sure you pasted the key correctly
+• Free keys have limits but work for testing
+• Some features work without keys anyway!
 
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│                           UI GUIDE                                           │
+│                           UI GUIDE                                          │
 └──────────────────────────────────────────────────────────────────────────────┘
 
-The app has 4 tabs:
+4 Tabs:
 
-💬 CHAT
-────────
-Main conversation area. Type commands and press Enter or click Send.
-
-📚 FEATURES
-──────────
-Complete list of all available features.
-
-⚡ QUICK COMMANDS
-─────────────────
-Fast reference for common commands with examples.
-
-ℹ️ ABOUT
-────────
-Application information and credits.
+💬 CHAT - Main conversation area
+📚 FEATURES & APIs - All commands
+🔑 API SETTINGS - Configure API keys
+ℹ️ ABOUT - App information
 
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│                           LICENSE                                            │
+│                           LICENSE                                          │
 └──────────────────────────────────────────────────────────────────────────────┘
 
-AI Assistant v5.0
+AI Assistant v6.0 - API Edition
 Free to use and modify!
