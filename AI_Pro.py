@@ -611,14 +611,20 @@ class IntentParser:
     def parse(text: str) -> Dict:
         t = text.lower().strip()
         
-        if "?" in t or any(w in t for w in ["what", "who", "where", "when", "why", "how", "explain", "describe", "tell me"]):
+        # First check if it's a question (most important)
+        question_words = ["?", "what", "who", "where", "when", "why", "how", "explain", "describe", "tell me", "define meaning"]
+        if any(w in t for w in question_words):
             return {"intent": "question", "text": text}
         
-        commands = ["weather", "news", "calculate", "convert", "password", "time", "date", "joke", "fact", "quote", "search", "wiki", "define", "crypto", "bitcoin", "ethereum", "translate", "dice", "coin", "random", "bmi", "tip", "age", "unit", "hash", "base64", "reverse", "uppercase", "lowercase", "word count", "ip", "system", "riddle", "would you rather", "note", "todo", "list", "rock paper", "guess", "emoji", "ascii", "color", "qr", "all crypto", "personality", "clear history", "export", "import", "settings", "summarize"]
-        if any(t.startswith(c) or f" {c}" in t for c in commands):
-            return {"intent": "command", "text": text}
+        # Check for explicit commands (must be at start)
+        command_starts = ["weather ", "news ", "calculate ", "calc ", "convert ", "password ", "time", "date", "joke", "fact", "quote", "search ", "wiki ", "define ", "crypto ", "bitcoin ", "ethereum ", "translate ", "dice ", "coin flip", "random ", "bmi ", "tip ", "age ", "unit ", "hash ", "base64 ", "reverse ", "uppercase ", "lowercase ", "word count", "ip ", "system", "riddle", "would you ", "add note", "add todo", "list notes", "list todos", "rock paper", "guess ", "emoji ", "ascii art", "qr ", "all crypto", "personality ", "clear history", "export chat", "import chat", "settings", "summarize"]
         
-        entertainment = ["joke", "funny", "laugh", "fact", "trivia", "quote", "inspiration", "sing", "poem", "story", "riddle", "would you"]
+        for cmd in command_starts:
+            if t.startswith(cmd) or t == cmd:
+                return {"intent": "command", "text": text}
+        
+        # Check entertainment keywords
+        entertainment = ["joke", "funny", "laugh", "fact", "trivia", "quote", "inspiration", "sing", "poem", "story", "riddle"]
         if any(w in t for w in entertainment):
             return {"intent": "entertainment", "text": text}
         
@@ -676,23 +682,33 @@ class ProAI:
                       "know", "can", "could", "would", "should", "will", "did", "does", "for", "with", 
                       "to", "of", "in", "on", "at", "by", "from", "that", "this", "it", "its",
                       "your", "my", "his", "her", "their", "our", "be", "being", "been", "have", 
-                      "has", "had", "i", "you", "we", "they", "he", "she", "name", "called"}
+                      "has", "had", "i", "you", "we", "they", "he", "she", "name", "called", "mean",
+                      "good", "bad", "some", "one", "things", "thing", "much", "many"}
         
         # Strategy 1: Pattern-based extraction
         topic = ""
         patterns = [
-            (r"what is (?:a |an |the )?(.+?)(?:\?|$)", 1),
-            (r"who is (?:the )?(.+?)(?:\?|$)", 1),
+            # What questions
+            (r"what (?:is|are|was|were|do|does|did|can|could|would|should) (?:a |an |the )?(.+?)(?:\?|$)", 1),
             (r"what'?s (?:a |an |the )?(.+?)(?:\?|$)", 1),
+            # Who questions  
+            (r"who (?:is|are|was|were|do|does|did|can|could|would|should) (?:the )?(.+?)(?:\?|$)", 1),
+            # How questions
+            (r"how (?:do|does|did|can|could|would|should|to|many|much) (.+?)(?:\?|$)", 1),
+            # Why questions
+            (r"why (?:is|are|was|were|do|does|did|can|could|would|should|does) (.+?)(?:\?|$)", 1),
+            # Where questions
+            (r"where (?:is|are|was|were|do|does|did|can|could|would|should) (.+?)(?:\?|$)", 1),
+            # When questions
+            (r"when (?:is|are|was|were|do|does|did|can|could|would|should) (.+?)(?:\?|$)", 1),
+            # Other question patterns
             (r"explain (.+?)(?:\?|$)", 1),
             (r"describe (.+?)(?:\?|$)", 1),
             (r"tell me about (.+?)(?:\?|$)", 1),
-            (r"define (.+?)(?:\?|$)", 1),
             (r"can you (.+?)(?:\?|$)", 1),
-            (r"how (?:do|does|did) (.+?)(?:\?|$)", 1),
-            (r"why (.+?)(?:\?|$)", 1),
-            (r"where (.+?)(?:\?|$)", 1),
-            (r"when (.+?)(?:\?|$)", 1),
+            (r"define (.+?)(?:\?|$)", 1),
+            (r"give me info(?:rmation)? about (.+?)(?:\?|$)", 1),
+            (r"info(?:rmation)? about (.+?)(?:\?|$)", 1),
         ]
         
         for pattern, group in patterns:
