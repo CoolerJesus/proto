@@ -1,0 +1,12 @@
+[
+  {
+    "role": "user",
+    "content": "nasa",
+    "timestamp": "2026-03-10T14:10:11.116576"
+  },
+  {
+    "role": "assistant",
+    "content": "🌌 NASA Picture of the Day:\n\nDemo NASA Picture of the Day\n\nThis is a demo. Add NASA API key for real data!\n\n🔗 https://www.nasa.gov/wp-content/uploads/2015/01/590331main_ringside_stand_hi_1.jpg",
+    "timestamp": "2026-03-10T14:10:11.116850"
+  }
+]

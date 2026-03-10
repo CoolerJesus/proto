@@ -168,6 +168,145 @@ class WebAPIs:
         url = f"https://duckduckgo.com/?q={urllib.parse.quote(query)}&format=json"
         result = WebAPIs.fetch(url)
         return result
+    
+    @staticmethod
+    def get_nasa_apod(api_key: str = "") -> Dict:
+        if not api_key:
+            return {"success": True, "title": "Demo NASA Picture of the Day", "explanation": "This is a demo. Add NASA API key for real data!", "url": "https://www.nasa.gov/wp-content/uploads/2015/01/590331main_ringside_stand_hi_1.jpg"}
+        url = f"https://api.nasa.gov/planetary/apod?api_key={api_key}"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            return {"success": True, "title": result["data"].get("title", ""), "explanation": result["data"].get("explanation", "")[:300], "url": result["data"].get("url", "")}
+        return {"success": False}
+    
+    @staticmethod
+    def get_github_user(username: str) -> Dict:
+        url = f"https://api.github.com/users/{urllib.parse.quote(username)}"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            d = result["data"]
+            return {"success": True, "login": d.get("login", ""), "name": d.get("name", ""), "bio": d.get("bio", ""), "public_repos": d.get("public_repos", 0), "followers": d.get("followers", 0), "following": d.get("following", 0)}
+        return {"success": False}
+
+
+# ==================== STOCK PRICES (MOCK) ====================
+
+class StockPrices:
+    PRICES = {"AAPL": 178.50, "GOOGL": 141.80, "MSFT": 378.90, "AMZN": 178.25, "TSLA": 248.50, "META": 505.75, "NVDA": 875.30, "AMD": 180.20, "NFLX": 485.60, "DIS": 112.40}
+    
+    @classmethod
+    def get_price(cls, symbol: str) -> Dict:
+        symbol = symbol.upper()
+        if symbol in cls.PRICES:
+            change = round(random.uniform(-5, 5), 2)
+            return {"success": True, "symbol": symbol, "price": cls.PRICES[symbol], "change": change}
+        return {"success": False}
+    
+    @classmethod
+    def get_all(cls) -> List[Dict]:
+        return [{"symbol": k, "price": v, "change": round(random.uniform(-3, 3), 2)} for k, v in cls.PRICES.items()]
+
+
+# ==================== COLOR CONVERTER ====================
+
+class ColorConverter:
+    @staticmethod
+    def hex_to_rgb(hex_color: str) -> Optional[tuple]:
+        hex_color = hex_color.strip("#")
+        if len(hex_color) == 6:
+            try:
+                return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+            except:
+                pass
+        return None
+    
+    @staticmethod
+    def rgb_to_hex(r: int, g: int, b: int) -> str:
+        return f"#{r:02x}{g:02x}{b:02x}"
+    
+    @staticmethod
+    def rgb_to_hsl(r: int, g: int, b: int) -> tuple:
+        r, g, b = r/255, g/255, b/255
+        max_c = max(r, g, b)
+        min_c = min(r, g, b)
+        l = (max_c + min_c) / 2
+        
+        if max_c == min_c:
+            h = s = 0
+        else:
+            d = max_c - min_c
+            s = d / (2 - max_c - min_c) if l > 0.5 else d / (max_c + min_c)
+            if max_c == r:
+                h = (g - b) / d + (6 if g < b else 0)
+            elif max_c == g:
+                h = (b - r) / d + 2
+            else:
+                h = (r - g) / d + 4
+            h /= 6
+        return (round(h*360), round(s*100), round(l*100))
+
+
+# ==================== ADVANCED MATH ====================
+
+class MathSolver:
+    @staticmethod
+    def solve(expr: str) -> Optional[str]:
+        try:
+            allowed = {"__builtins__": {}, "math": math, "sqrt": math.sqrt, "pi": math.pi, "e": math.e, 
+                      "sin": math.sin, "cos": math.cos, "tan": math.tan, "log": math.log, "log10": math.log10,
+                      "abs": abs, "round": round, "pow": pow, "max": max, "min": min, "floor": math.floor,
+                      "ceil": math.ceil, "factorial": math.factorial, "gcd": math.gcd, "lcm": lambda a,b: abs(a*b)//math.gcd(a,b)}
+            result = eval(expr, allowed)
+            return str(result)
+        except:
+            return None
+    
+    @staticmethod
+    def solve_quadratic(a: float, b: float, c: float) -> str:
+        d = b*b - 4*a*c
+        if d > 0:
+            x1 = (-b + math.sqrt(d)) / (2*a)
+            x2 = (-b - math.sqrt(d)) / (2*a)
+            return f"x = {x1:.2f} or x = {x2:.2f}"
+        elif d == 0:
+            x = -b / (2*a)
+            return f"x = {x:.2f}"
+        else:
+            real = -b / (2*a)
+            imag = math.sqrt(-d) / (2*a)
+            return f"x = {real:.2f} + {imag:.2f}i or x = {real:.2f} - {imag:.2f}i"
+
+
+# ==================== LANGUAGE TRANSLATION (MOCK) ====================
+
+class Translator:
+    MOCK_TRANSLATIONS = {
+        ("hello", "es"): "hola",
+        ("hello", "fr"): "bonjour",
+        ("hello", "de"): "hallo",
+        ("hello", "it"): "ciao",
+        ("hello", "ja"): "konnichiwa",
+        ("hello", "zh"): "ni hao",
+        ("hello", "ko"): "annyeong",
+        ("goodbye", "es"): "adios",
+        ("goodbye", "fr"): "au revoir",
+        ("goodbye", "de"): "auf wiedersehen",
+        ("thank you", "es"): "gracias",
+        ("thank you", "fr"): "merci",
+        ("thank you", "de"): "danke",
+        ("yes", "es"): "si",
+        ("yes", "fr"): "oui",
+        ("no", "es"): "no",
+        ("no", "fr"): "non",
+    }
+    
+    @classmethod
+    def translate(cls, text: str, target: str) -> str:
+        text_lower = text.lower().strip()
+        key = (text_lower, target.lower())
+        if key in cls.MOCK_TRANSLATIONS:
+            return cls.MOCK_TRANSLATIONS[key]
+        return f"[Mock] {text} -> {target.upper()}"
 
 
 # ==================== KNOWLEDGE BASE ====================
@@ -616,15 +755,46 @@ class IntentParser:
         if any(w in t for w in question_words):
             return {"intent": "question", "text": text}
         
-        # Check for explicit commands (must be at start)
-        command_starts = ["weather ", "news ", "calculate ", "calc ", "convert ", "password ", "time", "date", "joke", "fact", "quote", "search ", "wiki ", "define ", "crypto ", "bitcoin ", "ethereum ", "translate ", "dice ", "coin flip", "random ", "bmi ", "tip ", "age ", "unit ", "hash ", "base64 ", "reverse ", "uppercase ", "lowercase ", "word count", "ip ", "system", "riddle", "would you ", "add note", "add todo", "list notes", "list todos", "rock paper", "guess ", "emoji ", "ascii art", "qr ", "all crypto", "personality ", "clear history", "export chat", "import chat", "settings", "summarize"]
+        # Check for explicit commands (must be at start or as standalone word)
+        command_starts = [
+            # Weather/Info
+            "weather ", "news ", "nasa", "github ",
+            # Math/Calc
+            "calculate ", "calc ", "solve ", "math ", "quadratic ",
+            # Generators
+            "password ", "uuid ", "dice ", "random ",
+            # Conversions
+            "convert ", "translate ", "color ", "unit ",
+            # Text tools
+            "define ", "reverse ", "uppercase ", "lowercase ", "word count", "count ", "hash ", "base64 ", "md5 ", "sha256 ", "qr ",
+            # Finance
+            "stock ", "all stocks", "crypto ", "all crypto",
+            # Time/Dates
+            "time", "date", "datetime", "age ", "leap year", "day of week",
+            # Tools
+            "bmi ", "tip ", "ip ", "system",
+            # Short commands
+            "joke", "fact", "quote", "trivia", "riddle", "ascii", "emoji",
+            # Productivity
+            "add note", "add todo", "notes", "todos", "tasks",
+            # Personality/Settings
+            "personality", "settings",
+            # History
+            "search history", "clear history", "export chat", "import chat", "summarize",
+            # Games
+            "rock paper", "rps", "guess number", "guess ",
+            # Web
+            "open ",
+            # Other
+            "would you", "word of the day", "daily word",
+        ]
         
         for cmd in command_starts:
             if t.startswith(cmd) or t == cmd:
                 return {"intent": "command", "text": text}
         
         # Check entertainment keywords
-        entertainment = ["joke", "funny", "laugh", "fact", "trivia", "quote", "inspiration", "sing", "poem", "story", "riddle"]
+        entertainment = ["joke", "funny", "laugh", "fact", "trivia", "quote", "inspiration", "sing", "poem", "story", "riddle", "would you"]
         if any(w in t for w in entertainment):
             return {"intent": "entertainment", "text": text}
         
@@ -1271,6 +1441,129 @@ What else would you like to know?"""
                 return result
             return "Not enough history to summarize"
         
+        # Stock prices
+        if t.startswith("stock ") or "stock price" in t:
+            symbol = re.search(r"(?:stock |stock price )?([a-z]+)", t)
+            if symbol:
+                s = symbol.group(1).upper()
+                result = StockPrices.get_price(s)
+                if result.get("success"):
+                    arrow = "📈" if result["change"] > 0 else "📉"
+                    return f"📈 {result['symbol']}: ${result['price']:.2f} {arrow} {result['change']}%"
+                return f"Unknown stock symbol: {s}. Try: AAPL, GOOGL, MSFT, AMZN, TSLA, META, NVDA, AMD, NFLX, DIS"
+        
+        if "all stocks" in t or "stock list" in t:
+            stocks = StockPrices.get_all()
+            result = "📈 Stock Prices:\n\n"
+            for s in stocks:
+                arrow = "📈" if s["change"] > 0 else "📉"
+                result += f"{s['symbol']}: ${s['price']:.2f} {arrow} {s['change']}%\n"
+            return result
+        
+        # Color converter
+        if "color" in t and ("convert" in t or "hex" in t or "rgb" in t):
+            hex_match = re.search(r"#?([0-9a-fA-F]{6})", t)
+            if hex_match:
+                rgb = ColorConverter.hex_to_rgb(hex_match.group(1))
+                if rgb:
+                    hsl = ColorConverter.rgb_to_hsl(*rgb)
+                    hex_val = ColorConverter.rgb_to_hex(*rgb)
+                    return f"🎨 Color Converter:\n\nHex: #{hex_match.group(1).upper()}\nRGB: rgb({rgb[0]}, {rgb[1]}, {rgb[2]})\nHSL: hsl({hsl[0]}, {hsl[1]}%, {hsl[2]}%)"
+        
+        # NASA Picture of the Day
+        if "nasa" in t or "space photo" in t or "apod" in t:
+            result = WebAPIs.get_nasa_apod(self.config.get_key("nasa"))
+            if result.get("success"):
+                return f"🌌 NASA Picture of the Day:\n\n{result['title']}\n\n{result['explanation']}\n\n🔗 {result.get('url', '')}"
+        
+        # GitHub user info
+        if "github" in t and "user" in t or t.startswith("github "):
+            match = re.search(r"github\s+(\w+)", t)
+            if match:
+                username = match.group(1)
+                result = WebAPIs.get_github_user(username)
+                if result.get("success"):
+                    return f"👤 GitHub User: {result['login']}\n\nName: {result.get('name', 'N/A')}\nBio: {result.get('bio', 'N/A')}\nRepos: {result.get('public_repos', 0)}\nFollowers: {result.get('followers', 0)}\nFollowing: {result.get('following', 0)}"
+        
+        # Translation
+        if "translate" in t:
+            match = re.search(r"translate\s+(.+?)\s+to\s+(\w+)", t)
+            if match:
+                text_to_translate = match.group(1)
+                target_lang = match.group(2)
+                result = Translator.translate(text_to_translate, target_lang)
+                return f"🌍 Translation to {target_lang.upper()}:\n\n{result}"
+        
+        # Math solver
+        if "solve" in t or "math" in t:
+            match = re.search(r"(?:solve|math)\s+(.+)", t)
+            if match:
+                expr = match.group(1)
+                result = MathSolver.solve(expr)
+                if result:
+                    return f"🧮 Solution: {result}"
+        
+        # Quadratic equation
+        if "quadratic" in t or "roots" in t:
+            match = re.search(r"(\-?\d+)\s*x\s*[\^2]?\s*[+\-]\s*(\-?\d+)\s*x\s*[+\-]\s*(\-?\d+)\s*=\s*0", t)
+            if match:
+                a, b, c = int(match.group(1)), int(match.group(2)), int(match.group(3))
+                result = MathSolver.solve_quadratic(a, b, c)
+                return f"🧮 Quadratic Equation: {a}x² + {b}x + {c} = 0\n\nSolutions: {result}"
+        
+        # Open website
+        if t.startswith("open ") or "open website" in t:
+            match = re.search(r"open\s+(.+)", t)
+            if match:
+                site = match.group(1).strip()
+                if not site.startswith("http"):
+                    site = "https://" + site
+                try:
+                    webbrowser.open(site)
+                    return f"🌐 Opening: {site}"
+                except:
+                    return f"Could not open: {site}"
+        
+        # Countdown timer
+        if "countdown" in t or "timer" in t:
+            match = re.search(r"(\d+)\s*(?:second|min|hour)", t)
+            if match:
+                return f"⏱️ Timer set for {match.group(1)}! (Note: Actual timer requires GUI integration)"
+        
+        # Word of the day
+        if "word of the day" in t or "daily word" in t:
+            words = ["serendipity", "ephemeral", "eloquent", "resilient", "enigma", "wanderlust", "petrichor", "sonder", "euphoria", "halcyon"]
+            word = random.choice(words)
+            definition = WebAPIs.define_word(word)
+            if definition.get("success"):
+                return f"📝 Word of the Day: {definition['word']}\n\n({definition.get('phonetic', '')})\n\n{definition['definitions'][0]['def']}"
+        
+        # Leap year check
+        if "leap year" in t:
+            match = re.search(r"(\d{4})", t)
+            if match:
+                year = int(match.group(1))
+                is_leap = (year % 4 == 0 and year % 100 != 0) or (year % 400 == 0)
+                return f"📅 {year} is {'a leap year' if is_leap else 'not a leap year'}"
+        
+        # Age calculator
+        if "age" in t and "born" in t:
+            match = re.search(r"born\s+(\d{4})", t)
+            if match:
+                year = int(match.group(1))
+                age = datetime.now().year - year
+                return f"🎂 Age: {age} years old"
+        
+        # Day of week
+        if "day of week" in t or "what day" in t:
+            match = re.search(r"(\d{4})-(\d{1,2})-(\d{1,2})", t)
+            if match:
+                try:
+                    d = datetime(int(match.group(1)), int(match.group(2)), int(match.group(3)))
+                    return f"📅 {d.strftime('%A, %B %d, %Y')}"
+                except:
+                    pass
+        
         # Settings
         if "settings" in t:
             return f"⚙️ Current Settings:\n\n• Personality: {self.personality}\n• Username: {self.user_name or 'Not set'}\n• Messages: {self.conv_count}\n• History: {len(self.memory.messages)} messages\n\nSay 'personality set [name]' to change"
@@ -1373,15 +1666,20 @@ What else would you like to know?"""
 • What is [topic]?
 • Who is [person]?
 • Define [word]
+• How to [something]
+• Where is [place]?
+• When did [event]?
 
 🔧 UTILITIES:
 • weather [city] • news • calculate [math]
 • password [length] • uuid • time • date
 • convert [num] [from] to [to]
 • crypto [coin] • all crypto
+• stock [symbol] • all stocks
 • dice [X]d[Y] • coin flip • random [X] to [Y]
 • bmi [weight]kg [height]cm • tip [amount] at [X]%
-• age [birth year]
+• age [birth year] • leap year [year]
+• day of week [YYYY-MM-DD]
 
 📝 TEXT TOOLS:
 • count [text] • reverse [text]
@@ -1389,6 +1687,15 @@ What else would you like to know?"""
 • base64 encode [text] • base64 decode [text]
 • md5 [text] • sha256 [text]
 • qr [text]
+
+🎨 CONVERTERS:
+• color #hexcode (color converter)
+• translate [text] to [language]
+
+🌐 WEB:
+• nasa / space photo
+• github [username]
+• open [website]
 
 💻 SYSTEM:
 • ip • system info
@@ -1415,7 +1722,7 @@ What else would you like to know?"""
 • Tell me your name!
 • Ask me anything!
 
-Pro Features: Memory, Search, Export, Multiple Personalities!"""
+✨ NEW: Stocks, Colors, NASA, GitHub, Translation!"""
 
 
 # ==================== GUI ====================
