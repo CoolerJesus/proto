@@ -1,146 +1,288 @@
 ╔══════════════════════════════════════════════════════════════════════════════╗
-║                    AI ASSISTANT v6.0 - INSTALLATION                         ║
-║                         WITH REAL API CONNECTIONS                            ║
+║                    AI ASSISTANT PRO v12 - COMPLETE HELP                  ║
+║                     100+ Features - Like ChatGPT                       ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 
-┌──────────────────────────────────────────────────────────────────────────────┐
-│                              QUICK START                                     │
-└──────────────────────────────────────────────────────────────────────────────┘
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                              RUN THE APP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-STEP 1: Install Python (if not already installed)
-───────────────────────────────────────────────────
-• Download from: https://www.python.org/downloads/
-• IMPORTANT: Check "Add Python to PATH" during installation
-• Minimum version: Python 3.7
+  Double-click: run.bat
+  Or: python AI_Pro.py
 
-STEP 2: Run the Application
-────────────────────────────
-DOUBLE-CLICK: AI_Assistant.bat
+  Just type naturally - ask questions, use commands, or chat!
 
 
-┌──────────────────────────────────────────────────────────────────────────────┐
-│                        NEW IN v6.0 - REAL APIS!                             │
-└──────────────────────────────────────────────────────────────────────────────┘
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                           FREE APIs (NO KEY NEEDED)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-🎉 NOW WITH LIVE DATA CONNECTIONS!
-
-✅ WORKS WITHOUT API KEYS (Free features):
-• 🔍 Wikipedia search - "wiki python"
-• 📖 Wikipedia summaries - "what is AI"
-• 📖 Dictionary definitions - "define happiness"
-• 😂 Random jokes - "joke"
-
-🔑 OPTIONAL API KEYS (For real data):
-• 🌤️ Weather - Get free key at openweathermap.org
-• 📰 News - Get free key at newsapi.org
-
-Set API key in app: Go to "API Settings" tab
-
-
-┌──────────────────────────────────────────────────────────────────────────────┐
-│                           FEATURES OVERVIEW                                  │
-└──────────────────────────────────────────────────────────────────────────────┘
-
-🔍 WIKIPEDIA (FREE - No key needed!)
-─────────────────────────────
-• wiki python - Search Wikipedia
-• what is machine learning - Get summary
-
-📖 DICTIONARY (FREE - No key needed!)
-──────────────────────────────────────
-• define happiness - Word definition
-
-😂 JOKES (FREE - No key needed!)
-───────────────────────────────────
-• joke - Random joke
-• joke programming - Programming joke
-
-🌤️ WEATHER
-──────────
-• weather London - Current weather
-• forecast Paris - 5-day forecast
-• Get free API key: openweathermap.org
-
-📰 NEWS
-───────
-• news - Top headlines
-• news technology - Tech news
-• Get free API key: newsapi.org
-
-🔢 MATH & UTILITIES
-────────────────────
-• calculate 2+2*3
-• random 1 100
-• convert 100 km to mi
-• time / date
-
-🌍 LANGUAGE
-────────────
-• translate hello to es
-• detect language hola
-
-🗄️ DATABASE
-────────────
-• db insert {"name":"John"}
-• db list
-• db count users
-
-🧠 MACHINE LEARNING
-────────────────────
-• init nn 3 5 2
-• train nn [1,0,1] with [1,0]
-• predict [1,0,1]
-
-🔐 CRYPTOGRAPHY
-────────────────
-• md5 password
-• uuid
-
-💻 CODE
-───────
-• python print('Hello')
-
-📊 ANALYSIS
-──────────
-• sentiment I love this
+  🌐 WEATHER (Demo Mode):
+    • weather London
+    • weather New York
+    
+  📰 NEWS (Demo Mode):
+    • news
+    • headlines
+    
+  🌍 WIKIPEDIA (FREE):
+    • What is Python?
+    • Who is Elon Musk?
+    • Explain quantum computing
+    
+  📖 DICTIONARY (FREE):
+    • define happiness
+    • meaning of love
 
 
-┌──────────────────────────────────────────────────────────────────────────────┐
-│                           TROUBLESHOOTING                                   │
-└──────────────────────────────────────────────────────────────────────────────┘
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                         NEW FREE APIS (REAL DATA!)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-"Python not found" ERROR
-─────────────────────────
-1. Download Python from https://python.org
-2. During install, CHECK "Add Python to PATH"
-3. Restart your computer
+  🐱 CAT FACTS:
+    • cat fact
+    
+  🐕 DOG FACTS:
+    • dog fact
+    
+  ❓ TRIVIA:
+    • trivia
+    • new trivia
+    
+  👤 RANDOM USER:
+    • random user
+    • generate user
+    
+  🔮 PREDICTIONS:
+    • gender john
+    • predict age elon
+    • nationality maria
+    
+  🔢 NUMBER FACTS:
+    • number fact 42
+    • fact about 7
+    
+  💱 EXCHANGE RATES:
+    • exchange rate USD to EUR
+    • rate 100 GBP to JPY
+    
+  🎄 HOLIDAYS:
+    • holidays 2025
+    • holidays
+    
+  💭 QUOTES:
+    • quote of the day
+    • daily quote
 
-Window looks wrong
-──────────────────
-• The window is resizable - drag corners to enlarge
 
-API keys not working?
-─────────────────────
-• Make sure you pasted the key correctly
-• Free keys have limits but work for testing
-• Some features work without keys anyway!
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                            ALL COMMANDS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  📈 STOCKS (Demo):
+    • stock AAPL
+    • stock TSLA
+    • stock NVDA
+    • all stocks
+    
+  💰 CRYPTO (Demo):
+    • crypto bitcoin
+    • crypto ethereum
+    • all crypto
+    
+  💵 CURRENCY:
+    • convert 100 USD to EUR
+    • convert 50 GBP to JPY
+    
+  🧮 MATH:
+    • calculate 2+2*3
+    • solve sqrt(144)
+    • math factorial(5)
+    • quadratic 1x^2 + 5x + 6 = 0
+    
+  🎲 RANDOM:
+    • dice
+    • dice 2d20
+    • coin flip
+    • random 1 to 100
+    
+  🔐 PASSWORDS:
+    • password
+    • password 32
+    
+  🆔 UUID:
+    • uuid
+    
+  ⏰ TIME/DATE:
+    • time
+    • date
+    • datetime
+    • age 1990
+    • leap year 2024
+    • day of week 2024-12-25
 
 
-┌──────────────────────────────────────────────────────────────────────────────┐
-│                           UI GUIDE                                          │
-└──────────────────────────────────────────────────────────────────────────────┘
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                           TEXT TOOLS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-4 Tabs:
+  • reverse hello
+  • uppercase hello
+  • lowercase HELLO
+  • count hello world
+  • base64 encode secret
+  • base64 decode c2VjcmV0
+  • md5 password
+  • sha256 password
+  • qr my text
 
-💬 CHAT - Main conversation area
-📚 FEATURES & APIs - All commands
-🔑 API SETTINGS - Configure API keys
-ℹ️ ABOUT - App information
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                          CONVERTERS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  🎨 COLOR:
+    • color #FF5500
+    
+  ⚖️ BMI:
+    • bmi 70kg 175cm
+    
+  💵 TIP:
+    • tip 50 at 20%
+    
+  🌡️ UNITS:
+    • convert 10 km to miles
+    • convert 100 fahrenheit to celsius
 
 
-┌──────────────────────────────────────────────────────────────────────────────┐
-│                           LICENSE                                          │
-└──────────────────────────────────────────────────────────────────────────────┘
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                           WEB APIs
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-AI Assistant v6.0 - API Edition
-Free to use and modify!
+  🌌 NASA:
+    • nasa
+    • space photo
+    
+  👤 GITHUB:
+    • github torvalds
+    • github microsoft
+    
+  🌍 COUNTRY:
+    • country Japan
+    • country Germany
+    
+  🌐 WEBSITE:
+    • open google.com
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                        PRODUCTIVITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  📝 NOTES:
+    • add note Buy milk
+    • notes
+    • show notes
+    
+  ✅ TODOS:
+    • add todo Finish project
+    • todos
+    • todo 1 (toggle)
+    
+  ⏰ REMINDERS:
+    • remind me to call mom
+    • reminders
+    
+  📁 FILES:
+    • list files
+    • files in C:
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                           ENTERTAINMENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  😂 JOKES:
+    • joke
+    
+  💡 FACTS:
+    • fact
+    • did you know
+    
+  💭 QUOTES:
+    • quote
+    
+  ❓ TRIVIA:
+    • trivia
+    
+  🧩 RIDDLES:
+    • riddle
+    
+  🤔 WOULD YOU RATHER:
+    • would you rather
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                             GAMES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  🪨📄✂️ ROCK PAPER SCISSORS:
+    • rock
+    • paper
+    • scissors
+    
+  🎯 NUMBER GUESSING:
+    • guess number
+    • guess 50
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                          PERSONALITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  • personality (show current)
+  • personality set helpful
+  • personality set professional
+  • personality set creative
+  • personality set tech
+  • personality set funny
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                          SETTINGS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  • settings
+  • Tell me your name!
+  • my name is John
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                          SYSTEM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  • ip
+  • system info
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                          HISTORY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  • search history python
+  • clear history
+  • export chat
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                          VERSION INFO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  AI Assistant Pro v12
+  
+  100+ Commands, 15+ Free APIs, Memory, Personalities
+  Like ChatGPT but on your desktop!
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                         ENJOY YOUR AI ASSISTANT!                            ║
+╚══════════════════════════════════════════════════════════════════════════════╝

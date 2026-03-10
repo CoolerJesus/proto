@@ -151,6 +151,134 @@ class WebAPIs:
             return {"success": True, "articles": [{"title": a.get("title", ""), "source": a.get("source", {}).get("name", "")} for a in d.get("articles", [])[:5]]}
         return {"success": False}
     
+    # ========== MORE FREE APIS ==========
+    
+    @staticmethod
+    def get_cat_fact() -> Dict:
+        url = "https://catfact.ninja/fact"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            return {"success": True, "fact": result["data"].get("fact", "")}
+        return {"success": False}
+    
+    @staticmethod
+    def get_dog_fact() -> Dict:
+        url = "https://dogapi.dog/api/v2/facts?limit=1"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            try:
+                fact = result["data"][0]["attributes"]["body"]
+                return {"success": True, "fact": fact}
+            except:
+                pass
+        return {"success": False}
+    
+    @staticmethod
+    def get_trivia(category: str = "") -> Dict:
+        categories = {"science": 17, "history": 23, "geography": 22, "art": 25, "sports": 21, "general": 9}
+        cat_id = categories.get(category.lower(), 9) if category else 9
+        url = f"https://opentdb.com/api.php?amount=1&category={cat_id}&type=multiple"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            data = result["data"]
+            if data.get("results"):
+                q = data["results"][0]
+                return {"success": True, "question": q.get("question", ""), "correct": q.get("correct_answer", ""), "incorrect": q.get("incorrect_answers", [])}
+        return {"success": False}
+    
+    @staticmethod
+    def predict_gender(name: str) -> Dict:
+        url = f"https://api.genderize.io?name={urllib.parse.quote(name)}"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            d = result["data"]
+            return {"success": True, "name": d.get("name", ""), "gender": d.get("gender", "unknown"), "probability": d.get("probability", 0)}
+        return {"success": False}
+    
+    @staticmethod
+    def predict_age(name: str) -> Dict:
+        url = f"https://api.agify.io?name={urllib.parse.quote(name)}"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            d = result["data"]
+            return {"success": True, "name": d.get("name", ""), "age": d.get("age", "unknown"), "count": d.get("count", 0)}
+        return {"success": False}
+    
+    @staticmethod
+    def predict_nationality(name: str) -> Dict:
+        url = f"https://api.nationalize.io?name={urllib.parse.quote(name)}"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            d = result["data"]
+            countries = d.get("country", [])
+            return {"success": True, "name": d.get("name", ""), "countries": countries[:3]}
+        return {"success": False}
+    
+    @staticmethod
+    def get_random_user() -> Dict:
+        url = "https://randomuser.me/api/"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            d = result["data"]["results"][0]
+            name = d["name"]
+            return {"success": True, "name": f"{name['first']} {name['last']}", "email": d.get("email", ""), "location": f"{d['location']['city']}, {d['location']['country']}", "phone": d.get("phone", "")}
+        return {"success": False}
+    
+    @staticmethod
+    def get_number_fact(number: int = None) -> Dict:
+        num = number or random.randint(1, 1000)
+        url = f"http://numbersapi.com/{num}?json"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            return {"success": True, "number": num, "fact": result["data"].get("text", "")}
+        return {"success": False}
+    
+    @staticmethod
+    def get_exchange_rate(from_c: str, to_c: str) -> Dict:
+        url = f"https://api.exchangerate.host/latest?base={from_c.upper()}"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            rates = result["data"].get("rates", {})
+            rate = rates.get(to_c.upper())
+            if rate:
+                return {"success": True, "from": from_c.upper(), "to": to_c.upper(), "rate": rate}
+        return {"success": False}
+    
+    @staticmethod
+    def get_quote() -> Dict:
+        url = "https://api.quotable.io/random"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            d = result["data"]
+            return {"success": True, "quote": d.get("content", ""), "author": d.get("author", "")}
+        return {"success": False}
+    
+    @staticmethod
+    def get_holidays(year: int = None, country: str = "US") -> Dict:
+        y = year or datetime.now().year
+        url = f"https://date.nager.at/api/v3/PublicHolidays/{y}/{country}"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            holidays = result["data"][:10]
+            return {"success": True, "holidays": [{"date": h.get("date", ""), "name": h.get("localName", "")} for h in holidays]}
+        return {"success": False}
+    
+    @staticmethod
+    def get_word_definition(word: str) -> Dict:
+        url = f"https://api.dictionaryapi.dev/api/v2/entries/en/{urllib.parse.quote(word)}"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            try:
+                data = result["data"][0]
+                defs = []
+                for meaning in data.get("meanings", [])[:2]:
+                    for defn in meaning.get("definitions", [])[:2]:
+                        defs.append({"part": meaning.get("partOfSpeech", ""), "def": defn.get("definition", "")[:150]})
+                return {"success": True, "word": data.get("word", ""), "phonetic": data.get("phonetic", ""), "definitions": defs}
+            except:
+                pass
+        return {"success": False}
+    
     @staticmethod
     def get_ip_info() -> Dict:
         try:
@@ -969,15 +1097,15 @@ class IntentParser:
             # Text tools
             "define ", "reverse ", "uppercase ", "lowercase ", "word count", "count ", "hash ", "base64 ", "md5 ", "sha256 ", "qr ",
             # Finance
-            "stock ", "all stocks", "crypto ", "all crypto",
+            "stock ", "all stocks", "crypto ", "all crypto", "exchange rate",
             # Time/Dates
-            "time", "date", "datetime", "age ", "leap year", "day of week",
+            "time", "date", "datetime", "age ", "leap year", "day of week", "holidays", "holiday",
             # Tools
             "bmi ", "tip ", "ip ", "system",
             # Short commands
-            "ascii art", "emoji",
+            "ascii art", "emoji", "cat fact", "dog fact", "trivia", "number fact",
             # Productivity
-            "add note", "add todo", "notes", "todos", "tasks",
+            "add note", "add todo", "notes", "todos", "tasks", "remind",
             # Personality/Settings
             "personality", "settings",
             # History
@@ -987,7 +1115,9 @@ class IntentParser:
             # Web
             "open ",
             # Word of day
-            "word of the day", "daily word",
+            "word of the day", "daily word", "quote of the day",
+            # NEW APIs
+            "random user", "gender ", "nationality", "predict age",
         ]
         
         for cmd in command_starts:
@@ -1807,6 +1937,112 @@ What else would you like to know?"""
                 return f"📁 Files:\n\n" + "\n".join(f"• {f}" for f in files[:20])
             return "📁 No files found"
         
+        # === NEW FREE API COMMANDS ===
+        
+        # Cat fact
+        if t in ["cat fact", "cat facts"]:
+            result = WebAPIs.get_cat_fact()
+            if result.get("success"):
+                return f"🐱 Cat Fact:\n\n{result['fact']}"
+            return "Could not fetch cat fact"
+        
+        # Dog fact
+        if t in ["dog fact", "dog facts"]:
+            result = WebAPIs.get_dog_fact()
+            if result.get("success"):
+                return f"🐕 Dog Fact:\n\n{result['fact']}"
+            return "Could not fetch dog fact"
+        
+        # Trivia
+        if t in ["trivia", "new trivia", "random trivia"]:
+            categories = ["science", "history", "geography", "art", "sports", "general"]
+            cat = random.choice(categories)
+            result = WebAPIs.get_trivia(cat)
+            if result.get("success"):
+                self._trivia_question = result
+                answers = result["incorrect"] + [result["correct"]]
+                random.shuffle(answers)
+                return f"❓ Trivia ({cat}):\n\n{result['question']}\n\n" + "\n".join(f"{i+1}. {a}" for i, a in enumerate(answers))
+            return "Could not fetch trivia"
+        
+        # Answer trivia
+        if hasattr(self, '_trivia_question') and self._trivia_question and t[0].isdigit():
+            return "Trivia answered! Say 'new trivia' for another question."
+        
+        # Gender prediction
+        if "gender" in t:
+            match = re.search(r"gender\s+(\w+)", t)
+            if match:
+                name = match.group(1)
+                result = WebAPIs.predict_gender(name)
+                if result.get("success"):
+                    return f"👤 Gender Prediction for '{result['name']}':\n\nGender: {result['gender']}\nProbability: {result['probability']*100:.0f}%"
+        
+        # Age prediction
+        if "age" in t and "predict" in t:
+            match = re.search(r"predict.*?age\s+(\w+)", t)
+            if not match:
+                match = re.search(r"age\s+of\s+(\w+)", t)
+            if match:
+                name = match.group(1)
+                result = WebAPIs.predict_age(name)
+                if result.get("success"):
+                    return f"🎂 Predicted Age for '{result['name']}':\n\nAge: {result['age']}\nRecords found: {result['count']}"
+        
+        # Nationality prediction
+        if "nationality" in t or "where from" in t:
+            match = re.search(r"(?:nationality|where from)\s+(\w+)", t)
+            if match:
+                name = match.group(1)
+                result = WebAPIs.predict_nationality(name)
+                if result.get("success"):
+                    countries = result.get("countries", [])
+                    if countries:
+                        result_text = f"🌍 Nationality Prediction for '{result['name']}':\n\n"
+                        for c in countries:
+                            result_text += f"• {c.get('country_id', 'N/A')}: {c.get('probability', 0)*100:.1f}%\n"
+                        return result_text
+        
+        # Random user
+        if "random user" in t or "generate user" in t:
+            result = WebAPIs.get_random_user()
+            if result.get("success"):
+                return f"👤 Random User:\n\nName: {result['name']}\nEmail: {result['email']}\nLocation: {result['location']}\nPhone: {result['phone']}"
+        
+        # Number fact
+        if "number fact" in t or "fact about" in t:
+            match = re.search(r"(\d+)", t)
+            num = int(match.group(1)) if match else None
+            result = WebAPIs.get_number_fact(num)
+            if result.get("success"):
+                return f"🔢 Fact about {result['number']}:\n\n{result['fact']}"
+        
+        # Exchange rate
+        if "exchange rate" in t or "rate" in t and "to" in t:
+            match = re.search(r"(\w+)\s+to\s+(\w+)", t)
+            if match:
+                from_c, to_c = match.group(1), match.group(2)
+                result = WebAPIs.get_exchange_rate(from_c, to_c)
+                if result.get("success"):
+                    return f"💱 Exchange Rate:\n\n1 {result['from']} = {result['rate']:.4f} {result['to']}"
+        
+        # Holidays
+        if "holidays" in t or "holiday" in t:
+            match = re.search(r"(\d{4})", t)
+            year = int(match.group(1)) if match else datetime.now().year
+            result = WebAPIs.get_holidays(year)
+            if result.get("success"):
+                result_text = f"🎄 Holidays {year} (US):\n\n"
+                for h in result["holidays"]:
+                    result_text += f"• {h['date']}: {h['name']}\n"
+                return result_text
+        
+        # Quote of the day
+        if "quote of the day" in t or "daily quote" in t:
+            result = WebAPIs.get_quote()
+            if result.get("success"):
+                return f"💭 Quote of the Day:\n\n\"{result['quote']}\"\n\n— {result['author']}"
+        
         # AI Chat response (use generator for better responses)
         return AIResponseGenerator.generate_response(text, self.personality)
     
@@ -1896,7 +2132,7 @@ What else would you like to know?"""
         return random.choice(responses)
     
     def _get_help(self) -> str:
-        return """🤖 AI Assistant PRO v12 - Ultimate Commands:
+        return """🤖 AI Assistant PRO v12 - ALL COMMANDS:
 
 📝 QUESTIONS:
 • What is [topic]?
@@ -1907,58 +2143,96 @@ What else would you like to know?"""
 • When did [event]?
 
 🔧 UTILITIES:
-• weather [city] • news • calculate [math]
-• password [length] • uuid • time • date
+• weather [city] • news
+• calculate [math] • solve [expression]
+• password [length] • uuid
+• time • date • datetime
 • convert [num] [from] to [to]
+• exchange rate [USD] to [EUR]
 • crypto [coin] • all crypto
 • stock [symbol] • all stocks
-• dice [X]d[Y] • coin flip • random [X] to [Y]
-• bmi [weight]kg [height]cm • tip [amount] at [X]%
-• age [birth year] • leap year [year]
+
+🎲 RANDOM:
+• dice • dice 2d20
+• coin flip
+• random [1] to [100]
+• random user
+
+📊 HEALTH:
+• bmi [weight]kg [height]cm
+• tip [amount] at [X]%
+
+📅 TIME:
+• age [birth year]
+• leap year [year]
 • day of week [YYYY-MM-DD]
+• holidays [2024]
 
 📝 TEXT TOOLS:
-• count [text] • reverse [text]
-• uppercase [text] • lowercase [text]
-• base64 encode [text] • base64 decode [text]
-• md5 [text] • sha256 [text]
+• count [text]
+• reverse [text]
+• uppercase [text]
+• lowercase [text]
+• base64 encode [text]
+• base64 decode [text]
+• md5 [text]
+• sha256 [text]
 • qr [text]
 
 🎨 CONVERTERS:
-• color #hexcode (color converter)
+• color #hexcode
 • translate [text] to [language]
 
-🌐 WEB:
-• nasa / space photo
+🌐 WEB APIs:
+• nasa • space photo
 • github [username]
+• country [name]
 • open [website]
 
-💻 SYSTEM:
-• ip • system info
+🔮 PREDICTIONS:
+• gender [name]
+• predict age [name]
+• nationality [name]
+
+🐱🐕 FACTS:
+• cat fact
+• dog fact
+• number fact [42]
+• trivia
+
+💭 QUOTES:
+• quote of the day
+• joke • fact • quote
 
 📋 PRODUCTIVITY:
 • add note [text] • notes
 • add todo [task] • todos
 • todo [number] (toggle)
-
-🎮 GAMES:
-• rock / paper / scissors
-• guess number • guess [X]
-
-🎭 PERSONALITY:
-• personality (show/change)
+• remind me to [task]
 
 💾 HISTORY:
 • search history [query]
-• summarize conversation
 • clear history
 • export chat
+
+🎮 GAMES:
+• rock / paper / scissors
+• guess number
+
+🎭 PERSONALITY:
+• personality
+• personality set [name]
 
 💬 CHAT:
 • Tell me your name!
 • Ask me anything!
 
-✨ NEW: Stocks, Colors, NASA, GitHub, Translation!"""
+🌟 TRY THESE NEW ONES:
+• random user
+• gender john
+• nationality elon
+• holidays 2025
+• quote of the day"""
 
 
 # ==================== GUI ====================
