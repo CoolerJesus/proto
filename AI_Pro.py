@@ -187,6 +187,202 @@ class WebAPIs:
             d = result["data"]
             return {"success": True, "login": d.get("login", ""), "name": d.get("name", ""), "bio": d.get("bio", ""), "public_repos": d.get("public_repos", 0), "followers": d.get("followers", 0), "following": d.get("following", 0)}
         return {"success": False}
+    
+    @staticmethod
+    def get_country_info(country: str) -> Dict:
+        url = f"https://restcountries.com/v3.1/name/{urllib.parse.quote(country)}?fullText=true"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            try:
+                data = result["data"][0]
+                return {"success": True, "name": data.get("name", {}).get("common", ""), "capital": data.get("capital", ["N/A"])[0], "population": data.get("population", 0), "region": data.get("region", ""), "currency": list(data.get("currencies", {}).keys())[0] if data.get("currencies") else "N/A", "languages": ", ".join(data.get("languages", {}).values())}
+            except:
+                pass
+        return {"success": False}
+
+
+# ==================== AI RESPONSE GENERATOR ====================
+
+class AIResponseGenerator:
+    """Simple AI response generator for non-knowledge questions"""
+    
+    @staticmethod
+    def generate_response(user_input: str, personality: str = "helpful") -> str:
+        t = user_input.lower()
+        
+        # Random conversational responses based on keywords
+        responses_by_topic = {
+            "greeting": [
+                "Hello! How can I help you today?",
+                "Hi there! What's on your mind?",
+                "Hey! Great to see you. What would you like to talk about?",
+            ],
+            "how_are_you": [
+                "I'm doing great, thanks for asking!",
+                "I'm excellent! Ready to help you with anything.",
+                "Fantastic! How can I assist you today?",
+            ],
+            "thank": [
+                "You're welcome! Happy to help!",
+                "No problem at all!",
+                "Anytime! That's what I'm here for.",
+            ],
+            "goodbye": [
+                "Goodbye! Take care!",
+                "See you later! Come back anytime.",
+                "Bye! It was nice talking to you!",
+            ],
+            "sorry": [
+                "No need to apologize!",
+                "It's okay! I'm here to help.",
+                "No problem at all!",
+            ],
+            "love": [
+                "Love is a beautiful thing!",
+                "That's wonderful to hear!",
+                "Love makes the world go round!",
+            ],
+            "happy": [
+                "That's great to hear!",
+                "I'm happy for you!",
+                "Wonderful! What made you happy?",
+            ],
+            "sad": [
+                "I'm sorry you're feeling that way. Want to talk about it?",
+                "Things can be tough. I'm here to listen.",
+                "I hope things get better. Let me know if I can help.",
+            ],
+            "bored": [
+                "Want to play a game? Try 'rock paper scissors' or 'guess number'!",
+                "I can tell you a joke or fun fact! Just ask!",
+                "How about some trivia? Ask me a riddle!",
+            ],
+            "tired": [
+                "Take care of yourself! Get some rest.",
+                "Remember to sleep! It's important.",
+                "Self-care is important. Hope you feel better soon!",
+            ],
+            "hungry": [
+                "You should eat something!",
+                "Food sounds good right now!",
+                "Maybe grab a snack!",
+            ],
+            "default": [
+                "That's interesting! Tell me more.",
+                "I see! What do you think about that?",
+                "That's something! How can I help you with this?",
+                "Interesting point! What would you like to know more about?",
+            ]
+        }
+        
+        # Detect topic
+        if any(w in t for w in ["hello", "hi", "hey", "greetings", "howdy"]):
+            return random.choice(responses_by_topic["greeting"])
+        if any(w in t for w in ["how are you", "how're you", "how do you do"]):
+            return random.choice(responses_by_topic["how_are_you"])
+        if any(w in t for w in ["thank", "thanks", "appreciate"]):
+            return random.choice(responses_by_topic["thank"])
+        if any(w in t for w in ["bye", "goodbye", "see you", "later", "farewell"]):
+            return random.choice(responses_by_topic["goodbye"])
+        if any(w in t for w in ["sorry", "apologize", "oops"]):
+            return random.choice(responses_by_topic["sorry"])
+        if any(w in t for w in ["love", "love you", "like you"]):
+            return random.choice(responses_by_topic["love"])
+        if any(w in t for w in ["happy", "glad", "excited", "awesome", "great", "amazing"]):
+            return random.choice(responses_by_topic["happy"])
+        if any(w in t for w in ["sad", "upset", "depressed", "down", "unhappy"]):
+            return random.choice(responses_by_topic["sad"])
+        if any(w in t for w in ["bored", "boring", "nothing to do"]):
+            return random.choice(responses_by_topic["bored"])
+        if any(w in t for w in ["tired", "sleepy", "exhausted", "fatigue"]):
+            return random.choice(responses_by_topic["tired"])
+        if any(w in t for w in ["hungry", "food", "eat"]):
+            return random.choice(responses_by_topic["hungry"])
+        
+        return random.choice(responses_by_topic["default"])
+
+
+# ==================== REMINDERS ====================
+
+class ReminderManager:
+    def __init__(self, config):
+        self.config = config
+    
+    def get_reminders(self):
+        return self.config.get("reminders") or []
+    
+    def add_reminder(self, text: str, time_str: str = None):
+        reminders = self.get_reminders()
+        reminders.append({"text": text, "time": time_str, "created": datetime.now().isoformat()})
+        self.config.set("reminders", reminders)
+    
+    def delete_reminder(self, index: int):
+        reminders = self.get_reminders()
+        if 0 <= index < len(reminders):
+            reminders.pop(index)
+            self.config.set("reminders", reminders)
+
+
+# ==================== FILE OPERATIONS (SAFE) ====================
+
+class FileManager:
+    @staticmethod
+    def list_files(directory: str = ".") -> List[str]:
+        try:
+            return [f for f in os.listdir(directory) if not f.startswith('.')]
+        except:
+            return []
+    
+    @staticmethod
+    def get_file_info(filepath: str) -> Dict:
+        try:
+            stat = os.stat(filepath)
+            return {"size": stat.st_size, "created": datetime.fromtimestamp(stat.st_ctime).isoformat(), "modified": datetime.fromtimestamp(stat.st_mtime).isoformat()}
+        except:
+            return {}
+
+
+# ==================== CODE EXECUTOR (SAFE) ====================
+
+class CodeExecutor:
+    SAFE_BUILTINS = {
+        'print': print,
+        'len': len,
+        'str': str,
+        'int': int,
+        'float': float,
+        'bool': bool,
+        'list': list,
+        'dict': dict,
+        'tuple': tuple,
+        'set': set,
+        'range': range,
+        'enumerate': enumerate,
+        'zip': zip,
+        'map': map,
+        'filter': filter,
+        'sum': sum,
+        'min': min,
+        'max': max,
+        'sorted': sorted,
+        'reversed': reversed,
+        'abs': abs,
+        'round': round,
+        'pow': pow,
+        'divmod': divmod,
+        'isinstance': isinstance,
+        'type': type,
+    }
+    
+    @classmethod
+    def execute_python(cls, code: str) -> str:
+        try:
+            result = eval(code, {"__builtins__": cls.SAFE_BUILTINS}, {})
+            return str(result)
+        except SyntaxError as e:
+            return f"Syntax Error: {e}"
+        except Exception as e:
+            return f"Error: {e}"
 
 
 # ==================== STOCK PRICES (MOCK) ====================
@@ -225,7 +421,7 @@ class ColorConverter:
         return f"#{r:02x}{g:02x}{b:02x}"
     
     @staticmethod
-    def rgb_to_hsl(r: int, g: int, b: int) -> tuple:
+    def rgb_to_hsl(r: int, g: int, b: int):
         r, g, b = r/255, g/255, b/255
         max_c = max(r, g, b)
         min_c = min(r, g, b)
@@ -755,7 +951,12 @@ class IntentParser:
         if any(w in t for w in question_words):
             return {"intent": "question", "text": text}
         
-        # Check for explicit commands (must be at start or as standalone word)
+        # Check entertainment FIRST (joke, fact, quote should be entertainment)
+        entertainment = ["joke", "funny", "laugh", "fact", "trivia", "quote", "inspiration", "sing", "poem", "story", "riddle", "would you", "riddle"]
+        if any(w in t for w in entertainment):
+            return {"intent": "entertainment", "text": text}
+        
+        # Then check for explicit commands (must be at start or as standalone word)
         command_starts = [
             # Weather/Info
             "weather ", "news ", "nasa", "github ",
@@ -774,7 +975,7 @@ class IntentParser:
             # Tools
             "bmi ", "tip ", "ip ", "system",
             # Short commands
-            "joke", "fact", "quote", "trivia", "riddle", "ascii", "emoji",
+            "ascii art", "emoji",
             # Productivity
             "add note", "add todo", "notes", "todos", "tasks",
             # Personality/Settings
@@ -785,18 +986,13 @@ class IntentParser:
             "rock paper", "rps", "guess number", "guess ",
             # Web
             "open ",
-            # Other
-            "would you", "word of the day", "daily word",
+            # Word of day
+            "word of the day", "daily word",
         ]
         
         for cmd in command_starts:
             if t.startswith(cmd) or t == cmd:
                 return {"intent": "command", "text": text}
-        
-        # Check entertainment keywords
-        entertainment = ["joke", "funny", "laugh", "fact", "trivia", "quote", "inspiration", "sing", "poem", "story", "riddle", "would you"]
-        if any(w in t for w in entertainment):
-            return {"intent": "entertainment", "text": text}
         
         return {"intent": "chat", "text": text}
 
@@ -809,10 +1005,10 @@ class ProAI:
         self.version = "12.0"
         self.config = Config()
         self.knowledge = KnowledgeBase()
-        self.memory = ConversationMemory(self.config.get("max_conversation_history", 100))
+        self.memory = ConversationMemory(self.config.get("max_conversation_history") or 100)
         
-        self.user_name = self.config.get("user_name", "")
-        self.personality = self.config.get("personality", "helpful")
+        self.user_name = self.config.get("user_name") or ""
+        self.personality = self.config.get("personality") or "helpful"
         self.conv_count = 0
         
         self._init_game_state()
@@ -1268,13 +1464,13 @@ What else would you like to know?"""
         if "add note" in t:
             note = text.split("add note ", 1)[1] if "add note " in t else ""
             if note:
-                notes = self.config.get("notes", [])
+                notes = self.config.get("notes") or []
                 notes.append({"text": note, "time": datetime.now().isoformat()})
                 self.config.set("notes", notes)
                 return f"📝 Note added: {note}"
         
         if t in ["notes", "list notes", "show notes"]:
-            notes = self.config.get("notes", [])
+            notes = self.config.get("notes") or []
             if notes:
                 result = "📝 Your Notes:\n\n"
                 for i, n in enumerate(notes[-10:], 1):
@@ -1286,13 +1482,13 @@ What else would you like to know?"""
         if "add todo" in t or "add task" in t:
             todo = text.split("add todo ", 1)[1] if "add todo " in t else text.split("add task ", 1)[1] if "add task " in t else ""
             if todo:
-                todos = self.config.get("todos", [])
+                todos = self.config.get("todos") or []
                 todos.append({"text": todo, "done": False, "time": datetime.now().isoformat()})
                 self.config.set("todos", todos)
                 return f"✅ Todo added: {todo}"
         
         if t in ["todos", "todo list", "show todos", "tasks"]:
-            todos = self.config.get("todos", [])
+            todos = self.config.get("todos") or []
             if todos:
                 result = "📋 Your Todos:\n\n"
                 for i, t in enumerate(todos[-10:], 1):
@@ -1306,8 +1502,8 @@ What else would you like to know?"""
         todo_toggle = re.search(r"todo\s+(\d+)", t)
         if todo_toggle:
             idx = int(todo_toggle.group(1)) - 1
-            todos = self.config.get("todos", [])
-            if 0 <= idx < len(todos):
+            todos = self.config.get("todos") or []
+            if todos and 0 <= idx < len(todos):
                 todos[idx]["done"] = not todos[idx]["done"]
                 self.config.set("todos", todos)
                 status = "done" if todos[idx]["done"] else "not done"
@@ -1564,15 +1760,55 @@ What else would you like to know?"""
                 except:
                     pass
         
-        # Settings
-        if "settings" in t:
-            return f"⚙️ Current Settings:\n\n• Personality: {self.personality}\n• Username: {self.user_name or 'Not set'}\n• Messages: {self.conv_count}\n• History: {len(self.memory.messages)} messages\n\nSay 'personality set [name]' to change"
+        # Country info
+        if "country" in t or t.startswith("info "):
+            match = re.search(r"(?:country |info )?(.+)", t)
+            if match:
+                country = match.group(1).strip()
+                if country and len(country) > 2:
+                    result = WebAPIs.get_country_info(country)
+                    if result.get("success"):
+                        return f"🌍 {result['name']}\n\nCapital: {result.get('capital', 'N/A')}\nRegion: {result.get('region', 'N/A')}\nPopulation: {result.get('population', 0):,}\nCurrency: {result.get('currency', 'N/A')}\nLanguages: {result.get('languages', 'N/A')}"
         
-        # Help
-        if "help" in t or "commands" in t:
-            return self._get_help()
+        # Reminders
+        if "remind" in t and "add" in t:
+            match = re.search(r"remind me to (.+)", t)
+            if match:
+                reminder_text = match.group(1)
+                reminders = self.config.get("reminders") or []
+                reminders.append({"text": reminder_text, "created": datetime.now().isoformat()})
+                self.config.set("reminders", reminders)
+                return f"⏰ Reminder added: {reminder_text}"
         
-        return f"I don't understand that. Try 'help' for all commands!"
+        if t in ["reminders", "list reminders", "show reminders"]:
+            reminders = self.config.get("reminders") or []
+            if reminders:
+                result = "⏰ Your Reminders:\n\n"
+                for i, r in enumerate(reminders, 1):
+                    result += f"{i}. {r['text']}\n"
+                return result
+            return "⏰ No reminders. Say 'remind me to [task]'"
+        
+        # Run Python code safely
+        if t.startswith("python ") or t.startswith("run "):
+            code = text.split("python ", 1)[1] if "python " in t else text.split("run ", 1)[1]
+            result = CodeExecutor.execute_python(code)
+            return f"💻 Output:\n{result}"
+        
+        # List files
+        if "list files" in t or "files in" in t:
+            match = re.search(r"files in (.+)", t)
+            if match:
+                folder = match.group(1).strip()
+                files = FileManager.list_files(folder)
+            else:
+                files = FileManager.list_files(".")
+            if files:
+                return f"📁 Files:\n\n" + "\n".join(f"• {f}" for f in files[:20])
+            return "📁 No files found"
+        
+        # AI Chat response (use generator for better responses)
+        return AIResponseGenerator.generate_response(text, self.personality)
     
     def _handle_entertainment(self, text: str) -> str:
         t = text.lower()
