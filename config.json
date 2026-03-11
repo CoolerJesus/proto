@@ -1,0 +1,19 @@
+{
+  "api_keys": {},
+  "user_name": "",
+  "notes": [],
+  "todos": [
+    {
+      "text": "learn python",
+      "done": false,
+      "time": "2026-03-11T17:41:57.029912"
+    }
+  ],
+  "personality": "helpful",
+  "theme": "dark",
+  "font_size": 12,
+  "auto_save": true,
+  "sound_enabled": true,
+  "max_conversation_history": 100,
+  "custom_prompts": {}
+}

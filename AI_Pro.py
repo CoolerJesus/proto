@@ -2,6 +2,68 @@
 """
 AI Assistant - PRO EDITION v12
 Ultimate AI Companion - Like ChatGPT/Claude
+
+=============================================================================
+STRUCTURE FOR DEVELOPERS
+=============================================================================
+
+This application is organized into the following sections:
+
+1. CONFIG (lines ~31-79)
+   - Config class: Manages persistent settings in config.json
+   - Handles API keys, user preferences, notes, todos
+
+2. WEB APIS (lines ~83-362)
+   - WebAPIs class: Static methods for external API calls
+   - Includes: Wikipedia, Dictionary, Weather, News, Stocks, Crypto,
+     Currency, Facts APIs, NASA, GitHub, Country info, and more
+   - All methods return {"success": bool, ...data}
+
+3. AI RESPONSE GENERATOR (lines ~366-465)
+   - AIResponseGenerator: Simple rule-based responses
+   - Handles greetings, thanks, farewells without external APIs
+
+4. UTILITY CLASSES (lines ~467-1100)
+   - ReminderManager: Schedule and manage reminders
+   - FileManager: File read/write operations
+   - CodeExecutor: Execute Python code snippets safely
+   - StockPrices: Fetch real stock data
+   - ColorConverter: HEX/RGB/HSL conversions
+   - MathSolver: Calculate expressions
+   - Translator: Basic translation (uses dictionary API)
+   - KnowledgeBase: Local Q&A knowledge base
+   - Personalities: Different AI personality modes
+   - ConversationMemory: Store and search conversation history
+   - CurrencyConverter: Convert between currencies
+   - CryptoPrices: Get cryptocurrency prices
+   - Entertainment: Jokes, facts, riddles, games
+   - TextTools: Reverse, uppercase, hash, base64, QR codes
+   - UnitConverter: Length, weight, temperature, etc.
+   - IntentParser: Parse user intent from natural language
+
+5. MAIN AI ENGINE (lines ~1164-2290)
+   - ProAI class: Core AI logic combining all features
+   - Handles question answering, command execution, responses
+
+6. GUI (lines ~2293-2511)
+   - App class: Tkinter-based desktop interface
+
+=============================================================================
+ADDING NEW FEATURES
+=============================================================================
+
+To add a new API:
+1. Add method to WebAPIs class following existing pattern
+2. Return {"success": bool, ...data} format
+3. Add intent/command handling in IntentParser
+4. Add response handling in ProAI
+
+To add a new command:
+1. Add keywords to IntentParser.intent_keywords
+2. Add handler method in ProAI
+3. Update HELP.txt documentation
+
+=============================================================================
 """
 
 import tkinter as tk
@@ -225,8 +287,8 @@ class WebAPIs:
         return {"success": False}
     
     @staticmethod
-    def get_number_fact(number: int = None) -> Dict:
-        num = number or random.randint(1, 1000)
+    def get_number_fact(number: Optional[int] = None) -> Dict:
+        num = number if number is not None else random.randint(1, 1000)
         url = f"http://numbersapi.com/{num}?json"
         result = WebAPIs.fetch(url)
         if result.get("success"):
@@ -254,8 +316,8 @@ class WebAPIs:
         return {"success": False}
     
     @staticmethod
-    def get_holidays(year: int = None, country: str = "US") -> Dict:
-        y = year or datetime.now().year
+    def get_holidays(year: Optional[int] = None, country: str = "US") -> Dict:
+        y = year if year is not None else datetime.now().year
         url = f"https://date.nager.at/api/v3/PublicHolidays/{y}/{country}"
         result = WebAPIs.fetch(url)
         if result.get("success"):
@@ -280,6 +342,38 @@ class WebAPIs:
         return {"success": False}
     
     @staticmethod
+    def fetch_url_content(url: str) -> Dict:
+        """Fetch content from any URL"""
+        try:
+            ctx = ssl.create_default_context()
+            ctx.check_hostname = False
+            ctx.verify_mode = ssl.CERT_NONE
+            req = urllib.request.Request(url, headers={'User-Agent': 'AI-Pro/12'})
+            with urllib.request.urlopen(req, context=ctx, timeout=15) as resp:
+                content = resp.read().decode('utf-8', errors='ignore')
+                title_match = re.search(r'<title[^>]*>([^<]+)</title>', content, re.IGNORECASE)
+                title = title_match.group(1) if title_match else "No title"
+                return {"success": True, "url": url, "title": title, "content": content[:2000]}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    @staticmethod
+    def get_current_datetime() -> Dict:
+        """Get current date and time info"""
+        now = datetime.now()
+        return {
+            "success": True,
+            "datetime": now.strftime("%Y-%m-%d %H:%M:%S"),
+            "date": now.strftime("%Y-%m-%d"),
+            "time": now.strftime("%H:%M:%S"),
+            "day": now.strftime("%A"),
+            "day_of_week": now.weekday(),
+            "month": now.strftime("%B"),
+            "year": now.year,
+            "iso_week": now.isocalendar()[1],
+        }
+    
+    @staticmethod
     def get_ip_info() -> Dict:
         try:
             ctx = ssl.create_default_context()
@@ -292,10 +386,77 @@ class WebAPIs:
             return {"success": False}
     
     @staticmethod
-    def search_duckduckgo(query: str) -> Dict:
-        url = f"https://duckduckgo.com/?q={urllib.parse.quote(query)}&format=json"
-        result = WebAPIs.fetch(url)
-        return result
+    def web_search(query: str, num_results: int = 5) -> Dict:
+        """Perform web search using DuckDuckGo HTML (no API key needed)"""
+        try:
+            url = f"https://html.duckduckgo.com/html/?q={urllib.parse.quote(query)}"
+            ctx = ssl.create_default_context()
+            ctx.check_hostname = False
+            ctx.verify_mode = ssl.CERT_NONE
+            req = urllib.request.Request(url, headers={
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'Accept': 'text/html,application/xhtml+xml',
+            })
+            with urllib.request.urlopen(req, context=ctx, timeout=15) as resp:
+                html = resp.read().decode('utf-8', errors='ignore')
+                
+            results = []
+            # Parse result links - DuckDuckGo uses redirect URLs
+            link_pattern = r'<a[^>]*class="result__a"[^>]*href="([^"]+)"[^>]*>([^<]+)</a>'
+            for match in re.findall(link_pattern, html):
+                href, title = match
+                title = re.sub(r'<[^>]+>', '', title).strip()
+                # Extract actual URL from DuckDuckGo redirect
+                actual_url = href
+                if 'uddg=' in href:
+                    try:
+                        actual_url = urllib.parse.unquote(href.split('uddg=')[1].split('&')[0])
+                    except:
+                        pass
+                if title and actual_url:
+                    results.append({"title": title, "url": actual_url, "snippet": ""})
+                    if len(results) >= num_results:
+                        break
+            
+            # Get snippets
+            for i, result in enumerate(results):
+                snippet_pattern = rf'class="result__a"[^>]*href="{re.escape(result['url'][:50])}"[^>]*>.*?class="result__snippet"[^>]*>([^<]+)</a>'
+                snippet_match = re.search(snippet_pattern, html, re.DOTALL)
+                if snippet_match:
+                    results[i]["snippet"] = snippet_match.group(1).strip()[:150]
+            
+            if results:
+                return {"success": True, "query": query, "results": results}
+        except Exception as e:
+            pass
+        return {"success": False, "error": "Search failed"}
+    
+    @staticmethod
+    def search_google(query: str) -> Dict:
+        """Fallback Google search using HTML scraping"""
+        try:
+            url = f"https://www.google.com/search?q={urllib.parse.quote(query)}&num=5"
+            ctx = ssl.create_default_context()
+            ctx.check_hostname = False
+            ctx.verify_mode = ssl.CERT_NONE
+            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'})
+            with urllib.request.urlopen(req, context=ctx, timeout=15) as resp:
+                html = resp.read().decode('utf-8', errors='ignore')
+            
+            results = []
+            # Simple pattern for Google result titles
+            pattern = r'<h3 class="[^"]*">(.*?)</h3>'
+            titles = re.findall(pattern, html)[:5]
+            for t in titles:
+                clean = re.sub(r'<[^>]+>', '', t).strip()
+                if clean:
+                    results.append({"title": clean})
+            
+            if results:
+                return {"success": True, "results": results}
+        except:
+            pass
+        return {"success": False}
     
     @staticmethod
     def get_nasa_apod(api_key: str = "") -> Dict:
@@ -326,6 +487,212 @@ class WebAPIs:
                 return {"success": True, "name": data.get("name", {}).get("common", ""), "capital": data.get("capital", ["N/A"])[0], "population": data.get("population", 0), "region": data.get("region", ""), "currency": list(data.get("currencies", {}).keys())[0] if data.get("currencies") else "N/A", "languages": ", ".join(data.get("languages", {}).values())}
             except:
                 pass
+        return {"success": False}
+
+    # ========== ADDITIONAL FREE APIS ==========
+
+    @staticmethod
+    def get_joke(category: str = "") -> Dict:
+        """Fetch a random joke from Official Joke API"""
+        cat = f"?category={category.lower()}" if category else ""
+        url = f"https://official-joke-api.appspot.com/random_joke{cat}"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            d = result["data"]
+            return {"success": True, "setup": d.get("setup", ""), "punchline": d.get("punchline", ""), "type": d.get("type", "")}
+        return {"success": False}
+
+    @staticmethod
+    def get_advice() -> Dict:
+        """Fetch random advice from Advice Slip API"""
+        url = "https://api.adviceslip.com/advice"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            return {"success": True, "advice": result["data"].get("slip", {}).get("advice", "")}
+        return {"success": False}
+
+    @staticmethod
+    def get_Chuck_Norris_fact() -> Dict:
+        """Fetch a Chuck Norris fact"""
+        url = "https://api.chucknorris.io/jokes/random"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            return {"success": True, "fact": result["data"].get("value", "")}
+        return {"success": False}
+
+    @staticmethod
+    def get_math_fact(number: Optional[int] = None) -> Dict:
+        """Get a math fact about a number (with local fallback)"""
+        math_facts = [
+            "42 is the answer to life, the universe, and everything (Douglas Adams)",
+            "Pi (π) is approximately 3.14159... and goes on forever",
+            "A prime number is only divisible by 1 and itself",
+            "0! (zero factorial) equals 1",
+            "The Fibonacci sequence appears throughout nature",
+            "Perfect numbers are equal to the sum of their proper divisors",
+            "There are infinitely many prime numbers",
+            "The square root of -1 is called 'i' (imaginary number)",
+            "A googol is 10^100 (1 followed by 100 zeros)",
+            "Euler's identity: e^(iπ) + 1 = 0 is considered beautiful",
+        ]
+        num = number if number is not None else random.randint(1, 100)
+        return {"success": True, "number": num, "fact": random.choice(math_facts)}
+
+    @staticmethod
+    def get_date_fact(number: Optional[int] = None) -> Dict:
+        """Get a historical fact about a date (with local fallback)"""
+        date_facts = [
+            {"month": 7, "day": 4, "fact": "In 1776, the US Declaration of Independence was signed"},
+            {"month": 12, "day": 25, "fact": "Christmas celebrates the birth of Jesus Christ"},
+            {"month": 1, "day": 1, "fact": "The Unix epoch started at midnight on January 1, 1970"},
+            {"month": 7, "day": 20, "fact": "In 1969, Apollo 11 landed on the moon"},
+            {"month": 10, "day": 31, "fact": "Halloween originated from the ancient Celtic festival of Samhain"},
+            {"month": 11, "day": 11, "fact": "Armistice Day marks the end of World War I (1918)"},
+            {"month": 4, "day": 22, "fact": "Earth Day was first celebrated in 1970"},
+            {"month": 3, "day": 14, "fact": "Pi Day celebrates the mathematical constant π (3/14)"},
+        ]
+        if number is None:
+            fact = random.choice(date_facts)
+        else:
+            fact = date_facts[number % len(date_facts)]
+        return {"success": True, **fact}
+
+    @staticmethod
+    def get_year_fact(year: Optional[int] = None) -> Dict:
+        """Get a historical fact about a year"""
+        y = year if year is not None else random.randint(1900, 2025)
+        url = f"http://numbersapi.com/{y}/year?json"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            return {"success": True, "year": y, "fact": result["data"].get("text", "")}
+        return {"success": False}
+
+    @staticmethod
+    def get_programming_joke() -> Dict:
+        """Get a programming-related joke"""
+        jokes = [
+            {"setup": "Why do programmers prefer dark mode?", "punchline": "Because light attracts bugs."},
+            {"setup": "What do you call a programmer from Finland?", "punchline": "Nerdic."},
+            {"setup": "Why did the developer go broke?", "punchline": "Because he used up all his cache."},
+            {"setup": "How many programmers does it take to change a light bulb?", "punchline": "None, that's a hardware problem."},
+            {"setup": "Why do Java developers wear glasses?", "punchline": "Because they can't C#."},
+        ]
+        joke = random.choice(jokes)
+        return {"success": True, **joke, "type": "programming"}
+
+    @staticmethod
+    def get_random_emoji() -> Dict:
+        """Get a random emoji with info"""
+        emojis = [
+            {"emoji": "😀", "name": "Grinning Face", "code": "U+1F600"},
+            {"emoji": "🚀", "name": "Rocket", "code": "U+1F680"},
+            {"emoji": "💡", "name": "Light Bulb", "code": "U+1F4A1"},
+            {"emoji": "🎉", "name": "Party Popper", "code": "U+1F389"},
+            {"emoji": "🔑", "name": "Key", "code": "U+1F511"},
+            {"emoji": "🌟", "name": "Star", "code": "U+2B50"},
+            {"emoji": "⚡", "name": "High Voltage", "code": "U+26A1"},
+            {"emoji": "📚", "name": "Books", "code": "U+1F4DA"},
+        ]
+        return {"success": True, **random.choice(emojis)}
+
+    @staticmethod
+    def get_bitcoin_price() -> Dict:
+        """Get current Bitcoin price from CoinGecko (free, no API key)"""
+        url = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            data = result["data"]
+            if "bitcoin" in data:
+                return {"success": True, "price": data["bitcoin"]["usd"], "currency": "USD"}
+        return {"success": False}
+
+    @staticmethod
+    def get_dog_image() -> Dict:
+        """Get a random dog image URL"""
+        url = "https://dog.ceo/api/breeds/image/random"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            return {"success": True, "image_url": result["data"].get("message", ""), "status": result["data"].get("status", "")}
+        return {"success": False}
+
+    @staticmethod
+    def get_cat_image() -> Dict:
+        """Get a random cat image URL"""
+        url = "https://api.thecatapi.com/v1/images/search"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            data = result["data"]
+            if isinstance(data, list) and len(data) > 0:
+                return {"success": True, "image_url": data[0].get("url", ""), "id": data[0].get("id", "")}
+        return {"success": False}
+
+    @staticmethod
+    def get_random_fox_image() -> Dict:
+        """Get a random fox image URL"""
+        url = "https://randomfox.ca/floof/"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            return {"success": True, "image_url": result["data"].get("image", ""), "link": result["data"].get("link", "")}
+        return {"success": False}
+
+    @staticmethod
+    def get_activity_suggestion() -> Dict:
+        """Get a random activity suggestion (with local fallback)"""
+        activities = [
+            {"activity": "Read a book for 30 minutes", "type": "relaxation", "participants": 1},
+            {"activity": "Take a walk in nature", "type": "relaxation", "participants": 1},
+            {"activity": "Learn a new recipe", "type": "cooking", "participants": 1},
+            {"activity": "Practice meditation for 10 minutes", "type": "relaxation", "participants": 1},
+            {"activity": "Write in a journal", "type": "relaxation", "participants": 1},
+            {"activity": "Call a friend you haven't talked to", "type": "social", "participants": 2},
+            {"activity": "Do a 15-minute workout", "type": "exercise", "participants": 1},
+            {"activity": "Listen to a new podcast", "type": "entertainment", "participants": 1},
+            {"activity": "Try a new hobby or craft", "type": "creative", "participants": 1},
+            {"activity": "Organize your workspace", "type": "productive", "participants": 1},
+        ]
+        return {"success": True, **random.choice(activities)}
+
+    @staticmethod
+    def get_public_ip() -> Dict:
+        """Get public IP address"""
+        url = "https://api.ipify.org?format=json"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            return {"success": True, "ip": result["data"].get("ip", "")}
+        return {"success": False}
+
+    @staticmethod
+    def get_world_time(timezone: str = "UTC") -> Dict:
+        """Get current time for a timezone"""
+        url = f"http://worldtimeapi.org/api/timezone/{timezone}"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            d = result["data"]
+            return {"success": True, "datetime": d.get("datetime", ""), "timezone": d.get("timezone", ""), "utc_offset": d.get("utc_offset", "")}
+        return {"success": False}
+
+    @staticmethod
+    def get_mnemonic_word() -> Dict:
+        """Get a random word for memorization"""
+        url = "https://random-word-api.herokuapp.com/word?number=1"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            words = result["data"]
+            if isinstance(words, list) and len(words) > 0:
+                return {"success": True, "word": words[0]}
+        return {"success": False}
+
+    @staticmethod
+    def get_github_trending(lang: str = "") -> Dict:
+        """Get trending GitHub repositories"""
+        url = f"https://api.github.com/search/repositories?q=created:>{datetime.now().strftime('%Y-%m-%d')}&sort=stars&order=desc"
+        if lang:
+            url += f"+language:{lang}"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            items = result["data"].get("items", [])[:5]
+            repos = [{"name": r.get("full_name", ""), "stars": r.get("stargazers_count", 0), "url": r.get("html_url", ""), "desc": r.get("description", "")[:100]} for r in items]
+            return {"success": True, "repos": repos}
         return {"success": False}
 
 
@@ -439,7 +806,7 @@ class ReminderManager:
     def get_reminders(self):
         return self.config.get("reminders") or []
     
-    def add_reminder(self, text: str, time_str: str = None):
+    def add_reminder(self, text: str, time_str: Optional[str] = None):
         reminders = self.get_reminders()
         reminders.append({"text": text, "time": time_str, "created": datetime.now().isoformat()})
         self.config.set("reminders", reminders)
@@ -549,7 +916,7 @@ class ColorConverter:
         return f"#{r:02x}{g:02x}{b:02x}"
     
     @staticmethod
-    def rgb_to_hsl(r: int, g: int, b: int):
+    def rgb_to_hsl(r: float, g: float, b: float):
         r, g, b = r/255, g/255, b/255
         max_c = max(r, g, b)
         min_c = min(r, g, b)
@@ -1087,7 +1454,9 @@ class IntentParser:
         # Then check for explicit commands (must be at start or as standalone word)
         command_starts = [
             # Weather/Info
-            "weather ", "news ", "nasa", "github ",
+            "weather ", "news ", "nasa", "github ", "wiki ",
+            # Finance - Crypto (must be before entertainment)
+            "crypto ", "bitcoin", "ethereum", "btc", "eth ",
             # Math/Calc
             "calculate ", "calc ", "solve ", "math ", "quadratic ",
             # Generators
@@ -1097,9 +1466,9 @@ class IntentParser:
             # Text tools
             "define ", "reverse ", "uppercase ", "lowercase ", "word count", "count ", "hash ", "base64 ", "md5 ", "sha256 ", "qr ",
             # Finance
-            "stock ", "all stocks", "crypto ", "all crypto", "exchange rate",
-            # Time/Dates
-            "time", "date", "datetime", "age ", "leap year", "day of week", "holidays", "holiday",
+            "stock ", "all stocks", "all crypto", "exchange rate",
+            # Time/Dates - Expanded
+            "time", "date", "datetime", "day", "today", "what day", "age ", "leap year", "day of week", "holidays", "holiday",
             # Tools
             "bmi ", "tip ", "ip ", "system",
             # Short commands
@@ -1118,6 +1487,8 @@ class IntentParser:
             "word of the day", "daily word", "quote of the day",
             # NEW APIs
             "random user", "gender ", "nationality", "predict age",
+            # Web Search
+            "search ", "search for ", "google ", "look up ",
         ]
         
         for cmd in command_starts:
@@ -1394,6 +1765,23 @@ What else would you like to know?"""
                 return "📰 Latest News:\n\n" + "\n".join(f"• {a['title']}" for a in result.get("articles", [])[:5])
             return "Could not fetch news"
         
+        # Wikipedia search
+        if t.startswith("wiki "):
+            topic = text[5:].strip()
+            if topic:
+                wiki = WebAPIs.get_wikipedia_summary(topic)
+                if wiki.get("success"):
+                    return f"📖 {wiki['title']}\n\n{wiki['text'][:600]}\n\n🔗 {wiki.get('url', '')}"
+                search = WebAPIs.search_wikipedia(topic)
+                if search.get("success"):
+                    results = search.get("results", [])
+                    if results:
+                        result = f"🔍 Wikipedia results for '{topic}':\n\n"
+                        for r in results[:4]:
+                            result += f"• {r['title']}\n  {r['desc'][:80]}...\n\n"
+                        return result
+                return f"Could not find Wikipedia article for '{topic}'"
+        
         # Calculator
         if t.startswith("calculate ") or t.startswith("calc ") or "what is " in t:
             expr = text.lower()
@@ -1413,17 +1801,38 @@ What else would you like to know?"""
             pwd = ''.join(secrets.choice(chars) for _ in range(min(length, 64)))
             return f"🔐 Generated password ({len(pwd)} chars):\n{pwd}"
         
-        # Time/Date
-        if t == "time":
-            return f"🕐 {datetime.now().strftime('%H:%M:%S')}"
-        if t == "date":
-            return f"📅 {datetime.now().strftime('%A, %B %d, %Y')}"
-        if t == "datetime":
-            return f"📅🕐 {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        # Time/Date - Enhanced with day info
+        if t == "time" or t == "what time is it":
+            now = WebAPIs.get_current_datetime()
+            return f"🕐 Current Time:\n\n{now['time']}\n\nToday is {now['day']}"
+        
+        if t == "date" or t == "what date is it" or t == "today":
+            now = WebAPIs.get_current_datetime()
+            return f"📅 Today's Date:\n\n{now['date']}\n\n{now['day']}, {now['month']} {datetime.now().day}, {now['year']}"
+        
+        if t == "datetime" or t == "what day is it" or t == "day info":
+            now = WebAPIs.get_current_datetime()
+            return f"📅🕐 Current Date & Time:\n\nDate: {now['date']}\nTime: {now['time']}\nDay: {now['day']}\nWeek: {now['iso_week']}\nMonth: {now['month']}\nYear: {now['year']}"
+        
+        if t in ["day", "what day is today", "what day is it"]:
+            now = WebAPIs.get_current_datetime()
+            return f"Today is {now['day']}, {now['date']}"
         
         # UUID
         if t in ["uuid", "guid", "generate uuid"]:
             return f"🆔 {uuid.uuid4()}"
+        
+        # Fetch URL
+        if t.startswith("fetch ") or t.startswith("get ") or t.startswith("open ") or t.startswith("url "):
+            match = re.search(r"(https?://[^\s]+|www\.[^\s]+|[a-zA-Z0-9]+\.[a-zA-Z]{2,}[^\s]*)", text)
+            if match:
+                url = match.group(1)
+                if not url.startswith("http"):
+                    url = "https://" + url
+                result = WebAPIs.fetch_url_content(url)
+                if result.get("success"):
+                    return f"🌐 Fetched: {result['title']}\n\nURL: {result['url']}\n\nContent preview:\n{result['content'][:500]}..."
+                return f"Could not fetch URL: {result.get('error', 'Unknown error')}"
         
         # Define
         if t.startswith("define ") or "meaning of" in t:
@@ -2043,6 +2452,33 @@ What else would you like to know?"""
             if result.get("success"):
                 return f"💭 Quote of the Day:\n\n\"{result['quote']}\"\n\n— {result['author']}"
         
+        # === WEB SEARCH COMMAND ===
+        if "search" in t or "google" in t or "look up" in t:
+            # Extract search query
+            query = text
+            for prefix in ["search ", "search for ", "google ", "look up "]:
+                if query.lower().startswith(prefix):
+                    query = query[len(prefix):]
+                    break
+            # Remove "on google" or similar suffixes
+            for suffix in [" on google", " on web", " online"]:
+                if query.lower().endswith(suffix):
+                    query = query[:-len(suffix)]
+            query = query.strip()
+            
+            if query and len(query) > 1:
+                result = WebAPIs.web_search(query, 5)
+                if result.get("success"):
+                    response = f"🔍 Search results for '{result['query']}':\n\n"
+                    for i, r in enumerate(result["results"], 1):
+                        response += f"{i}. {r['title']}\n"
+                        response += f"   {r['url']}\n"
+                        if r.get("snippet"):
+                            response += f"   {r['snippet'][:80]}...\n"
+                        response += "\n"
+                    return response
+                return "Search failed. Please try again."
+        
         # AI Chat response (use generator for better responses)
         return AIResponseGenerator.generate_response(text, self.personality)
     
@@ -2241,145 +2677,252 @@ class App:
     def __init__(self, root):
         self.root = root
         self.root.title("AI Assistant PRO v12")
-        self.root.geometry("1100x850")
-        self.root.minsize(800, 600)
+        self.root.geometry("1200x800")
+        self.root.minsize(900, 650)
         
+        # Modern dark theme palette
         self.colors = {
-            "bg": "#0d1117",
-            "bg2": "#161b22",
-            "bg3": "#21262d",
-            "bg4": "#30363d",
-            "text": "#c9d1d9",
-            "text_dim": "#8b949e",
+            "bg_main": "#0a0e14",
+            "bg_sidebar": "#0d1117",
+            "bg_chat": "#11161d",
+            "bg_input": "#161b22",
+            "bg_hover": "#1f2937",
+            "bg_card": "#1a1f29",
+            "text": "#e6edf3",
+            "text_dim": "#7d8590",
+            "text_bright": "#f0f6fc",
             "green": "#3fb950",
+            "green_dim": "#238636",
             "blue": "#58a6ff",
+            "blue_dim": "#1f6feb",
             "purple": "#a78bfa",
-            "accent": "#238636",
-            "red": "#f85149",
+            "purple_dim": "#8250df",
             "orange": "#d29922",
-            "cyan": "#56d4dd",
+            "orange_dim": "#9e6a03",
+            "red": "#f85149",
+            "cyan": "#39c5cf",
+            "pink": "#db61a2",
+            "border": "#30363d",
+            "highlight": "#388bfd",
         }
         
-        self.root.configure(bg=self.colors["bg"])
+        self.root.configure(bg=self.colors["bg_main"])
         self.ai = ProAI()
         
         self._setup_ui()
         self._welcome()
     
     def _setup_ui(self):
-        # Header
-        header = tk.Frame(self.root, bg=self.colors["bg"])
-        header.pack(fill="x", padx=20, pady=(15, 10))
+        # Main container
+        main_container = tk.Frame(self.root, bg=self.colors["bg_main"])
+        main_container.pack(fill="both", expand=True)
         
-        # Logo
-        tk.Label(header, text="◈", font=("Arial", 28), bg=self.colors["bg"], fg=self.colors["green"]).pack(side="left")
+        # Left Sidebar
+        sidebar = tk.Frame(main_container, bg=self.colors["bg_sidebar"], width=220)
+        sidebar.pack(side="left", fill="y")
+        sidebar.pack_propagate(False)
         
-        # Title
-        title_frame = tk.Frame(header, bg=self.colors["bg"])
-        title_frame.pack(side="left", padx=12, fill="x", expand=True)
+        # Logo section
+        logo_frame = tk.Frame(sidebar, bg=self.colors["bg_sidebar"], pady=20, padx=15)
+        logo_frame.pack(fill="x")
         
-        tk.Label(title_frame, text="AI Assistant PRO v12", font=("Segoe UI", 20, "bold"), bg=self.colors["bg"], fg=self.colors["green"]).pack(anchor="w")
-        tk.Label(title_frame, text="Ultimate AI Companion • Like ChatGPT, Claude", font=("Segoe UI", 9), bg=self.colors["bg"], fg=self.colors["text_dim"]).pack(anchor="w")
+        tk.Label(logo_frame, text="◈", font=("Segoe UI", 32), bg=self.colors["bg_sidebar"], 
+                fg=self.colors["green"]).pack()
+        tk.Label(logo_frame, text="AI Assistant", font=("Segoe UI", 18, "bold"), 
+                bg=self.colors["bg_sidebar"], fg=self.colors["text_bright"]).pack(pady=(5, 0))
+        tk.Label(logo_frame, text="PRO v12", font=("Segoe UI", 9), 
+                bg=self.colors["bg_sidebar"], fg=self.colors["green"]).pack()
         
-        # Buttons
-        btn_frame = tk.Frame(header, bg=self.colors["bg"])
-        btn_frame.pack(side="right")
+        # Quick actions section
+        tk.Label(sidebar, text="QUICK ACTIONS", font=("Segoe UI", 8, "bold"), 
+                bg=self.colors["bg_sidebar"], fg=self.colors["text_dim"], 
+                padx=15, pady=15, anchor="w").pack(fill="x")
         
-        buttons = [
-            ("Settings", self._settings, self.colors["orange"]),
-            ("Export", self._export_chat, self.colors["purple"]),
-            ("Clear", self._clear, self.colors["red"]),
-            ("Help", self._help, self.colors["blue"]),
+        quick_actions = [
+            ("🤖", "AI", self._quick_action),
+            ("🌐", "Search", lambda: self._quick_search()),
+            ("📰", "News", lambda: self._quick_cmd("news")),
+            ("💰", "Crypto", lambda: self._quick_cmd("all crypto")),
+            ("🎲", "Trivia", lambda: self._quick_cmd("trivia")),
+            ("😂", "Joke", lambda: self._quick_cmd("joke")),
+            ("📖", "Wiki", lambda: self._quick_wiki()),
+            ("🌤️", "Weather", lambda: self._quick_weather()),
         ]
         
-        for text, cmd, color in buttons:
-            tk.Button(btn_frame, text=text, command=cmd, bg=color, fg="white", 
-                     font=("Segoe UI", 9, "bold"), relief="flat", padx=14, pady=6, 
-                     cursor="hand2", bd=0).pack(side="left", padx=3)
+        for icon, label, cmd in quick_actions:
+            btn = tk.Frame(sidebar, bg=self.colors["bg_sidebar"], cursor="hand2")
+            btn.pack(fill="x", padx=10, pady=2)
+            btn.bind("<Button-1>", lambda e, c=cmd: c() if callable(c) else None)
+            btn.bind("<Enter>", lambda e, w=btn: w.config(bg=self.colors["bg_hover"]))
+            btn.bind("<Leave>", lambda e, w=btn: w.config(bg=self.colors["bg_sidebar"]))
+            
+            tk.Label(btn, text=icon, font=("Segoe UI", 14), bg=self.colors["bg_sidebar"], 
+                    width=3, anchor="e").pack(side="left", fill="y")
+            tk.Label(btn, text=label, font=("Segoe UI", 11), bg=self.colors["bg_sidebar"], 
+                    fg=self.colors["text"], anchor="w").pack(side="left", fill="both", expand=True, ipady=8)
         
-        # Chat display
+        # Stats section
+        stats_frame = tk.Frame(sidebar, bg=self.colors["bg_card"], padx=15, pady=15)
+        stats_frame.pack(side="bottom", fill="x", padx=10, pady=15)
+        
+        tk.Label(stats_frame, text="Session Stats", font=("Segoe UI", 9, "bold"), 
+                bg=self.colors["bg_card"], fg=self.colors["text_dim"]).pack(anchor="w", pady=(10, 5))
+        
+        self.stat_messages = tk.Label(stats_frame, text="Messages: 0", 
+                font=("Segoe UI", 10), bg=self.colors["bg_card"], fg=self.colors["text"])
+        self.stat_messages.pack(anchor="w", pady=5)
+        
+        self.stat_time = tk.Label(stats_frame, text="Started: --", 
+                font=("Segoe UI", 10), bg=self.colors["bg_card"], fg=self.colors["text"])
+        self.stat_time.pack(anchor="w")
+        
+        # Right content area
+        content = tk.Frame(main_container, bg=self.colors["bg_main"])
+        content.pack(side="left", fill="both", expand=True)
+        
+        # Header bar
+        header = tk.Frame(content, bg=self.colors["bg_main"], padx=20, pady=15)
+        header.pack(fill="x")
+        
+        title_area = tk.Frame(header, bg=self.colors["bg_main"])
+        title_area.pack(side="left")
+        
+        tk.Label(title_area, text="Chat", font=("Segoe UI", 22, "bold"), 
+                bg=self.colors["bg_main"], fg=self.colors["text_bright"]).pack(anchor="w")
+        tk.Label(title_area, text="Ask anything, use commands, or just chat", 
+                font=("Segoe UI", 10), bg=self.colors["bg_main"], fg=self.colors["text_dim"]).pack(anchor="w")
+        
+        # Header buttons
+        header_btns = tk.Frame(header, bg=self.colors["bg_main"])
+        header_btns.pack(side="right")
+        
+        header_buttons = [
+            ("New Chat", self._new_chat, self.colors["blue_dim"]),
+            ("Settings", self._settings, self.colors["orange_dim"]),
+            ("Export", self._export_chat, self.colors["purple_dim"]),
+            ("Clear", self._clear, self.colors["red"]),
+        ]
+        
+        for text, cmd, color in header_buttons:
+            btn = tk.Button(header_btns, text=text, command=cmd, 
+                           bg=color, fg="white", font=("Segoe UI", 9, "bold"),
+                           relief="flat", padx=16, pady=8, cursor="hand2", bd=0)
+            btn.pack(side="left", padx=4)
+        
+        # Chat display with rounded look
+        chat_frame = tk.Frame(content, bg=self.colors["bg_chat"], padx=2, pady=2)
+        chat_frame.pack(fill="both", expand=True, padx=15, pady=(0, 15))
+        
         self.chat = scrolledtext.ScrolledText(
-            self.root, bg=self.colors["bg2"], fg=self.colors["text"],
+            chat_frame, bg=self.colors["bg_chat"], fg=self.colors["text"],
             font=("Segoe UI", 12), relief="flat", wrap="word",
-            padx=20, pady=15, highlightthickness=0, bd=0
+            padx=20, pady=18, highlightthickness=0, bd=0
         )
-        self.chat.pack(fill="both", expand=True, padx=15, pady=(0, 15))
+        self.chat.pack(fill="both", expand=True)
         
-        # Tags
-        self.chat.tag_config("user", foreground=self.colors["blue"], spacing1=10, lmargin1=10, lmargin2=10)
-        self.chat.tag_config("ai", foreground=self.colors["green"], spacing1=10, lmargin1=10, lmargin2=10)
-        self.chat.tag_config("system", foreground=self.colors["text_dim"], spacing1=5, font=("Segoe UI", 10, "italic"))
+        # Chat tags for different message types
+        self.chat.tag_config("user", foreground=self.colors["blue"], spacing1=15, lmargin1=20, lmargin2=20, 
+                            font=("Segoe UI", 12, "bold"))
+        self.chat.tag_config("ai", foreground=self.colors["green"], spacing1=15, lmargin1=20, lmargin2=20)
+        self.chat.tag_config("system", foreground=self.colors["text_dim"], spacing1=8, 
+                            font=("Segoe UI", 10, "italic"))
+        self.chat.tag_config("header", foreground=self.colors["text_bright"], spacing1=20, 
+                            font=("Segoe UI", 12, "bold"))
         
-        # Input area
-        input_frame = tk.Frame(self.root, bg=self.colors["bg"])
-        input_frame.pack(fill="x", padx=20, pady=(0, 15))
+        # Input area with modern styling
+        input_container = tk.Frame(content, bg=self.colors["bg_input"], padx=15, pady=12)
+        input_container.pack(fill="x", padx=15, pady=(0, 15))
         
-        # Entry with styling
+        # Input wrapper with border
+        input_wrap = tk.Frame(input_container, bg=self.colors["border"], padx=2, pady=2)
+        input_wrap.pack(fill="x")
+        
         self.entry = tk.Entry(
-            input_frame, bg=self.colors["bg3"], fg=self.colors["text"],
+            input_wrap, bg=self.colors["bg_input"], fg=self.colors["text"],
             font=("Segoe UI", 13), relief="flat", insertbackground=self.colors["green"],
-            bd=0, highlightthickness=2, highlightcolor=self.colors["green"],
-            highlightbackground=self.colors["bg4"]
+            bd=0, highlightthickness=0
         )
-        self.entry.pack(side="left", fill="x", expand=True, ipady=12, padx=(0, 10))
+        self.entry.pack(fill="x", ipady=14, padx=10)
         self.entry.bind("<Return>", self._send)
         self.entry.bind("<KP_Enter>", self._send)
         
         # Send button
         send_btn = tk.Button(
-            input_frame, text="Send", command=self._send,
-            bg=self.colors["accent"], fg="white", font=("Segoe UI", 11, "bold"),
-            relief="flat", padx=30, pady=10, cursor="hand2", bd=0
+            input_wrap, text="➤ Send", command=self._send,
+            bg=self.colors["green_dim"], fg="white", font=("Segoe UI", 11, "bold"),
+            relief="flat", padx=24, pady=10, cursor="hand2", bd=0
         )
-        send_btn.pack(side="right")
+        send_btn.pack(side="right", padx=2, pady=2)
+        
+        # Hint text
+        tk.Label(input_container, text="Press Enter to send • Try 'help' for commands", 
+                font=("Segoe UI", 9), bg=self.colors["bg_input"], 
+                fg=self.colors["text_dim"]).pack(pady=(8, 0))
         
         # Status bar
-        status_frame = tk.Frame(self.root, bg=self.colors["bg3"])
-        status_frame.pack(fill="x")
+        status_bar = tk.Frame(content, bg=self.colors["bg_card"], padx=20, pady=8)
+        status_bar.pack(fill="x")
         
-        self.status = tk.Label(
-            status_frame, text="Ready • Ask me anything!",
-            bg=self.colors["bg3"], fg=self.colors["text_dim"],
-            font=("Segoe UI", 9), anchor="w", padx=15, pady=6
-        )
-        self.status.pack(side="left", fill="x", expand=True)
+        self.status = tk.Label(status_bar, text="● Ready", 
+                bg=self.colors["bg_card"], fg=self.colors["green"],
+                font=("Segoe UI", 9), anchor="w")
+        self.status.pack(side="left")
         
-        # Stats
-        self.stats = tk.Label(
-            status_frame, text=f"Messages: {self.ai.conv_count}",
-            bg=self.colors["bg3"], fg=self.colors["text_dim"],
-            font=("Segoe UI", 9), padx=15, pady=6
-        )
-        self.stats.pack(side="right")
-    
+        tk.Label(status_bar, text="|", bg=self.colors["bg_card"], fg=self.colors["border"]).pack(side="left", padx=10)
+        
+        self.persona_label = tk.Label(status_bar, text=f"Personality: {self.ai.personality}", 
+                bg=self.colors["bg_card"], fg=self.colors["text_dim"], font=("Segoe UI", 9))
+        self.persona_label.pack(side="left")
+        
+    def _quick_action(self):
+        self.entry.focus_set()
+        
+    def _quick_search(self):
+        self.entry.delete(0, "end")
+        self.entry.insert(0, "search ")
+        self.entry.focus_set()
+        
+    def _quick_wiki(self):
+        self.entry.delete(0, "end")
+        self.entry.insert(0, "wiki ")
+        self.entry.focus_set()
+        
+    def _quick_weather(self):
+        self.entry.delete(0, "end")
+        self.entry.insert(0, "weather ")
+        self.entry.focus_set()
+        
+    def _quick_cmd(self, cmd):
+        self.entry.delete(0, "end")
+        self.entry.insert(0, cmd)
+        self._send()
+        
+    def _new_chat(self):
+        self._clear()
+        
     def _welcome(self):
-        self._add("AI", """👋 Welcome to AI Assistant PRO v12!
+        self._add("header", "👋 Welcome to AI Assistant PRO v12!\n", "header")
+        self._add("AI", """🎯 Your Ultimate AI Companion
 
-🎯 I'm your ultimate AI companion - even better than ChatGPT!
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-💬 What I can do:
-• Answer ANY question
-• Use 50+ commands
+✨ What I can do:
+• Answer ANY question using web search & Wikipedia
+• 50+ commands (weather, crypto, stocks, news, etc.)
 • Remember our conversation
-• Search through chat history
-• Export conversations
 • Multiple personalities
-
-🔧 Try these:
-• "weather London"
-• "all crypto"
-• "personality"
-• "joke"
-• "help"
-• "settings"
-
-✨ NEW PRO FEATURES:
-• Conversation memory & search
-• Export/import chats
-• Multiple personalities (helpful, professional, creative, tech, funny)
-• Advanced crypto prices
-• QR code generator
+• Text tools (hash, QR, encode, etc.)
+• Games & entertainment
 • And much more!
+
+🚀 Quick Start:
+• Type naturally - I'll understand!
+• "weather London" - Get weather
+• "search Python" - Web search  
+• "joke" - Get a laugh
+• "all crypto" - Crypto prices
+• "help" - Full command list
+• "personality" - Change my style
 
 Let's chat! 🚀""", "ai")
     
@@ -2389,8 +2932,9 @@ Let's chat! 🚀""", "ai")
             return
         
         self.entry.delete(0, "end")
-        self._add("You", text, "user")
-        self.status.config(text="Thinking...")
+        self._add(f"user", f"You: ", "user")
+        self._add(f"", text + "\n\n", "user")
+        self.status.config(text="◐ Thinking...")
         self.root.update()
         
         threading.Thread(target=self._respond, args=(text,), daemon=True).start()
@@ -2398,16 +2942,20 @@ Let's chat! 🚀""", "ai")
     def _respond(self, text: str):
         try:
             response = self.ai.chat(text)
-            self.root.after(0, lambda: self._add("AI", response, "ai"))
-            self.root.after(0, lambda: self.status.config(text="Ready"))
-            self.root.after(0, lambda: self.stats.config(text=f"Messages: {self.ai.conv_count}"))
+            self.root.after(0, lambda: self._add("assistant", f"AI: ", "ai"))
+            self.root.after(0, lambda: self._add("", response + "\n\n", "ai"))
+            self.root.after(0, lambda: self.status.config(text="● Ready"))
+            self.root.after(0, lambda: self._update_stats())
         except Exception as e:
-            self.root.after(0, lambda: self._add("AI", f"Error: {str(e)}", "system"))
-            self.root.after(0, lambda: self.status.config(text="Error occurred"))
+            self.root.after(0, lambda: self._add("error", f"Error: {str(e)}\n", "system"))
+            self.root.after(0, lambda: self.status.config(text="● Error occurred"))
     
+    def _update_stats(self):
+        self.stat_messages.config(text=f"Messages: {self.ai.conv_count}")
+        
     def _add(self, sender: str, message: str, tag: str):
         self.chat.config(state="normal")
-        self.chat.insert("end", f"{sender}: {message}\n\n", tag)
+        self.chat.insert("end", f"{sender} {message}\n", tag)
         self.chat.see("end")
         self.chat.config(state="disabled")
     

@@ -1,0 +1,22 @@
+[
+  {
+    "role": "user",
+    "content": "what day is it today",
+    "timestamp": "2026-03-11T17:43:32.876326"
+  },
+  {
+    "role": "assistant",
+    "content": "🔍 Results for 'day today':\n\n• The Day Today\n  \n\n• No day but today\n  \n\n• Todd Day\n  \n\n• Day Day Up\n  \n\n",
+    "timestamp": "2026-03-11T17:43:33.681511"
+  },
+  {
+    "role": "user",
+    "content": "the day today",
+    "timestamp": "2026-03-11T17:43:41.553639"
+  },
+  {
+    "role": "assistant",
+    "content": "That's interesting! Tell me more or ask me a question!",
+    "timestamp": "2026-03-11T17:43:41.553689"
+  }
+]

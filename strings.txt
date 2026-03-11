@@ -1,0 +1,44 @@
+# AI Assistant Pro - String Resources
+# Edit these to customize messages, add translations, etc.
+
+[GREETINGS]
+hello = "Hello! How can I help you today?"
+hi = "Hi there! What's on your mind?"
+hey = "Hey! Great to see you. What would you like to talk about?"
+
+[STATUS]
+loading = "Loading..."
+thinking = "Let me think about that..."
+searching = "Searching..."
+
+[ERRORS]
+error_generic = "Something went wrong. Please try again."
+error_network = "Could not connect to the internet."
+error_not_found = "I couldn't find what you're looking for."
+
+[COMMANDS]
+help_hint = "Type 'help' for all commands"
+unknown = "I'm not sure how to respond. Try asking me something!"
+
+[EMOJI]
+robot = "🤖"
+search = "🔍"
+news = "📰"
+weather = "🌤️"
+stock = "📈"
+crypto = "💰"
+science = "🔬"
+math = "🧮"
+food = "🍕"
+music = "🎵"
+travel = "✈️"
+health = "💊"
+sports = "⚽"
+art = "🎨"
+tech = "💻"
+game = "🎮"
+book = "📚"
+phone = "📱"
+camera = "📷"
+car = "🚗"
+home = "🏠"
