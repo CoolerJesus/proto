@@ -75,6 +75,7 @@ import math
 import random
 import os
 import uuid
+import string
 import urllib.request
 import urllib.parse
 import ssl
@@ -696,6 +697,113 @@ class WebAPIs:
         return {"success": False}
 
 
+# ==================== FREE AI CONNECTORS ====================
+
+class FreeAIConnector:
+    """Connect to free AI APIs (no API key required)"""
+    
+    @staticmethod
+    def torgpt_chat(message: str, system_prompt: str = "You are a helpful AI assistant.") -> Dict:
+        """TorGPT - Free, no API key required"""
+        try:
+            url = "https://torgpt.space/api/v1/chat"
+            payload = {
+                "model": "torgpt",
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": message}
+                ]
+            }
+            data = json.dumps(payload).encode('utf-8')
+            ctx = ssl.create_default_context()
+            ctx.check_hostname = False
+            ctx.verify_mode = ssl.CERT_NONE
+            req = urllib.request.Request(url, data=data, headers={
+                'Content-Type': 'application/json',
+                'User-Agent': 'AI-Pro/12'
+            })
+            with urllib.request.urlopen(req, context=ctx, timeout=30) as resp:
+                result = json.loads(resp.read().decode())
+                if "choices" in result and len(result["choices"]) > 0:
+                    return {"success": True, "content": result["choices"][0]["message"]["content"], "model": "torgpt"}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+        return {"success": False}
+    
+    @staticmethod
+    def openrouter_chat(message: str, api_key: str = "free", system_prompt: str = "You are a helpful AI assistant.") -> Dict:
+        """OpenRouter - Has free models (requires free API key from openrouter.ai)"""
+        try:
+            url = "https://openrouter.ai/api/v1/chat/completions"
+            payload = {
+                "model": "deepseek/deepseek-r1:free",
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": message}
+                ]
+            }
+            data = json.dumps(payload).encode('utf-8')
+            ctx = ssl.create_default_context()
+            ctx.check_hostname = False
+            ctx.verify_mode = ssl.CERT_NONE
+            req = urllib.request.Request(url, data=data, headers={
+                'Content-Type': 'application/json',
+                'Authorization': f'Bearer {api_key}',
+                'HTTP-Referer': 'https://github.com',
+                'X-Title': 'AI-Pro'
+            })
+            with urllib.request.urlopen(req, context=ctx, timeout=30) as resp:
+                result = json.loads(resp.read().decode())
+                if "choices" in result and len(result["choices"]) > 0:
+                    return {"success": True, "content": result["choices"][0]["message"]["content"], "model": "deepseek-r1"}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+        return {"success": False}
+    
+    @staticmethod
+    def groq_chat(message: str, api_key: str = "gsk_random", system_prompt: str = "You are a helpful AI assistant.") -> Dict:
+        """Groq - Has free tier with fast inference (requires free API key from groq.com)"""
+        try:
+            url = "https://api.groq.com/openai/v1/chat/completions"
+            payload = {
+                "model": "llama-3.1-8b-instant",
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": message}
+                ]
+            }
+            data = json.dumps(payload).encode('utf-8')
+            ctx = ssl.create_default_context()
+            ctx.check_hostname = False
+            ctx.verify_mode = ssl.CERT_NONE
+            req = urllib.request.Request(url, data=data, headers={
+                'Content-Type': 'application/json',
+                'Authorization': f'Bearer {api_key}'
+            })
+            with urllib.request.urlopen(req, context=ctx, timeout=30) as resp:
+                result = json.loads(resp.read().decode())
+                if "choices" in result and len(result["choices"]) > 0:
+                    return {"success": True, "content": result["choices"][0]["message"]["content"], "model": "llama-3.1-8b-instant"}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+        return {"success": False}
+    
+    @staticmethod
+    def chat_with_ai(message: str, provider: str = "torgpt", api_key: str = "", system_prompt: str = "") -> Dict:
+        """Unified method to chat with any AI provider"""
+        if not system_prompt:
+            system_prompt = "You are a helpful AI assistant. Keep responses concise and friendly."
+        
+        if provider == "torgpt":
+            return FreeAIConnector.torgpt_chat(message, system_prompt)
+        elif provider == "openrouter":
+            return FreeAIConnector.openrouter_chat(message, api_key if api_key else "free", system_prompt)
+        elif provider == "groq":
+            return FreeAIConnector.groq_chat(message, api_key if api_key else "gsk_demo", system_prompt)
+        else:
+            return {"success": False, "error": f"Unknown provider: {provider}"}
+
+
 # ==================== AI RESPONSE GENERATOR ====================
 
 class AIResponseGenerator:
@@ -1091,6 +1199,16 @@ class KnowledgeBase:
             "antarctica": "Antarctica - Earth's southernmost continent. Ice-covered, no permanent residents. Scientific research only.",
             "sahara": "Sahara - Largest hot desert (9M km²). North Africa. Extreme temperatures, sand dunes.",
             "amazon rainforest": "Amazon - Largest tropical rainforest (5.5M km²). Brazil, Peru, Colombia. 10% of world's species.",
+            "mount everest": "Mount Everest - World's tallest mountain (8,849m). Located in Himalayas on Nepal-Tibet border. First climbed by Edmund Hillary & Tenzing Norgay in 1953.",
+            "everest": "Mount Everest - World's tallest mountain (8,849m). Located in Himalayas on Nepal-Tibet border. First climbed by Edmund Hillary & Tenzing Norgay in 1953.",
+            "tallest mountain": "Mount Everest - World's tallest mountain at 8,849 meters (29,032 feet). Located in the Himalayas on the border between Nepal and Tibet. First successfully climbed in 1953 by Edmund Hillary and Tenzing Norgay.",
+            "highest mountain": "Mount Everest - World's highest mountain at 8,849 meters (29,032 feet). Located in the Himalayas on the border between Nepal and Tibet.",
+            "mount kilimanjaro": "Mount Kilimanjaro - Africa's tallest mountain (5,895m). Located in Tanzania. Volcanic mountain with three volcanic cones. Summit called Uhuru Peak.",
+            "k2": "K2 - Second tallest mountain in the world (8,611m). Located on China-Pakistan border. Also known as Mount Godwin-Austen. More technically difficult than Everest.",
+            "alps": "Alps - Major mountain range in Europe. Spans France, Switzerland, Italy, Austria, Slovenia. Mont Blanc (4,808m) is the highest peak.",
+            "rocky mountains": "Rocky Mountains - Major mountain range in North America. Spans USA and Canada. Highest peak is Mount Elbert (4,401m) in Colorado.",
+            "himalayas": "Himalayas - World's highest mountain range. Spans India, Nepal, Bhutan, China, Pakistan. Contains 10 of Earth's 14 peaks over 8,000m.",
+            "highest peak": "Mount Everest - Highest peak in the world at 8,849 meters. Located in the Himalayas.",
             
             # Sports
             "football": "Football (Soccer) - World's most popular sport. 11 players per team. FIFA World Cup every 4 years.",
@@ -1119,6 +1237,26 @@ class KnowledgeBase:
             # General Knowledge
             "democracy": "Democracy - Government by people. Citizens vote for representatives. Types: direct, representative, parliamentary.",
             "capitalism": "Capitalism - Economic system with private ownership. Market forces determine prices. USA, UK examples.",
+            
+            # More Science & Nature
+            "sun": "Sun - The star at the center of our Solar System. About 4.6 billion years old. Provides light and heat for Earth. Diameter: 1.4 million km.",
+            "moon": "Moon - Earth's only natural satellite. 384,400 km from Earth. Diameter: 3,474 km. Controls ocean tides. First landed on 1969 (Apollo 11).",
+            "earth": "Earth - Third planet from the Sun. Only known planet with life. 71% water surface. Age: 4.5 billion years. Diameter: 12,742 km.",
+            "mars": "Mars - Fourth planet from the Sun. Known as Red Planet due to iron oxide. Has largest volcano (Olympus Mons) and canyon (Valles Marineris).",
+            "jupiter": "Jupiter - Largest planet in our Solar System. Gas giant with 79 known moons. Great Red Spot is a storm larger than Earth.",
+            "saturn": "Saturn - Sixth planet from the Sun. Famous for its beautiful rings made of ice and rock. Has 146 known moons including Titan.",
+            "ocean": "Oceans - Earth's five oceans: Pacific, Atlantic, Indian, Southern, Arctic. Cover 71% of Earth's surface. Deepest point: Mariana Trench (11km).",
+            "river": "Nile - World's longest river (6,650 km). Flows through northeastern Africa. Ancient Egyptian civilization depended on it. Amazon is second longest.",
+            "desert": "Desert - Arid land with less than 250mm annual rainfall. Sahara (9M km²) is largest hot desert. Antarctica is largest cold desert.",
+            
+            # More common questions
+            "age of earth": "Earth is approximately 4.54 billion years old, determined by radiometric dating of meteorites and lunar samples.",
+            "population of world": "World population is approximately 8 billion. Most populous countries: China, India, USA, Indonesia, Pakistan.",
+            "largest country": "Russia is the largest country by area (17M km²). Canada second. Vatican City is the smallest.",
+            "smallest country": "Vatican City is the smallest country (0.44 km²). Located inside Rome, Italy. Population about 800.",
+            "most spoken language": "English is most widely spoken (1.5B speakers). Mandarin Chinese has most native speakers (1.1B).",
+            "richest person": "As of 2026, world's richest person varies. Elon Musk and Jeff Bezos have been top contenders. Wealth changes daily.",
+            "biggest company": "Apple, Microsoft, and Saudi Aramco are typically the world's most valuable companies by market cap.",
             "socialism": "Socialism - Economic system with state/community ownership. Aims for equal distribution. Nordic model.",
             "education": "Education - Learning process. Primary, secondary, tertiary levels. Critical for development, employment.",
             "marriage": "Marriage - Legal union of partners. Varies by culture/religion. Legal rights, responsibilities.",
@@ -1434,6 +1572,213 @@ class UnitConverter:
         return None
 
 
+# ==================== VOICE & SYSTEM ====================
+
+class VoiceAssistant:
+    @staticmethod
+    def speak(text: str) -> bool:
+        try:
+            import pyttsx3
+            engine = pyttsx3.init()
+            engine.say(text)
+            engine.runAndWait()
+            return True
+        except ImportError:
+            return False
+        except:
+            return False
+    
+    @staticmethod
+    def listen() -> Optional[str]:
+        try:
+            import speech_recognition as sr
+            r = sr.Recognizer()
+            with sr.Microphone() as source:
+                r.adjust_for_ambient_noise(source)
+                audio = r.listen(source)
+            return r.recognize_google(audio)
+        except ImportError:
+            return None
+        except:
+            return None
+
+
+class SystemCommands:
+    @staticmethod
+    def shutdown(delay: int = 0) -> str:
+        try:
+            os.system(f"shutdown /s /t {delay}" if platform.system() == "Windows" else f"shutdown -h +{delay}")
+            return "Shutting down..."
+        except:
+            return "Could not shutdown"
+    
+    @staticmethod
+    def restart(delay: int = 0) -> str:
+        try:
+            os.system(f"shutdown /r /t {delay}" if platform.system() == "Windows" else f"shutdown -r +{delay}")
+            return "Restarting..."
+        except:
+            return "Could not restart"
+    
+    @staticmethod
+    def lock() -> str:
+        try:
+            if platform.system() == "Windows":
+                os.system("rundll32.exe user32.dll,LockWorkStation")
+            else:
+                return "Lock not supported on this system"
+            return "Screen locked"
+        except:
+            return "Could not lock"
+    
+    @staticmethod
+    def sleep() -> str:
+        try:
+            if platform.system() == "Windows":
+                os.system("rundll32.exe powrprof.dll,SetSuspendState 0,1,0")
+            return "Sleeping..."
+        except:
+            return "Could not sleep"
+    
+    @staticmethod
+    def empty_recycle_bin() -> str:
+        try:
+            if platform.system() == "Windows":
+                os.system('echo Y | powershell -Command "Clear-RecycleBin -Force"')
+            return "Recycle bin emptied"
+        except:
+            return "Could not empty recycle bin"
+    
+    @staticmethod
+    def get_system_info() -> Dict:
+        return {
+            "os": platform.system(),
+            "version": platform.version(),
+            "machine": platform.machine(),
+            "processor": platform.processor(),
+            "hostname": platform.node(),
+            "python_version": platform.python_version(),
+        }
+
+
+# ==================== UTILITIES ====================
+
+class PasswordGenerator:
+    @staticmethod
+    def generate(length: int = 16, include_special: bool = True) -> str:
+        chars = string.ascii_letters + string.digits
+        if include_special:
+            chars += "!@#$%^&*()_+-=[]{}|;:,.<>?"
+        return ''.join(secrets.choice(chars) for _ in range(length))
+
+
+class ClipboardManager:
+    @staticmethod
+    def copy(text: str) -> bool:
+        try:
+            root = tk.Tk()
+            root.withdraw()
+            root.clipboard_clear()
+            root.clipboard_append(text)
+            root.update()
+            return True
+        except:
+            return False
+    
+    @staticmethod
+    def paste() -> Optional[str]:
+        try:
+            root = tk.Tk()
+            root.withdraw()
+            return root.clipboard_get()
+        except:
+            return None
+
+
+class Screenshot:
+    @staticmethod
+    def capture() -> Optional[str]:
+        try:
+            from PIL import ImageGrab
+            img = ImageGrab.grab()
+            filename = f"screenshot_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
+            img.save(filename)
+            return filename
+        except ImportError:
+            return None
+        except:
+            return None
+
+
+class QRCode:
+    @staticmethod
+    def generate_url(data: str) -> str:
+        return f"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={urllib.parse.quote(data)}"
+
+
+# ==================== PRODUCTIVITY ====================
+
+class CalendarManager:
+    def __init__(self, config):
+        self.config = config
+    
+    def get_events(self):
+        return self.config.get("calendar_events") or []
+    
+    def add_event(self, title: str, date: str, time: Optional[str] = None):
+        events = self.get_events()
+        events.append({"title": title, "date": date, "time": time, "created": datetime.now().isoformat()})
+        self.config.set("calendar_events", events)
+    
+    def delete_event(self, index: int):
+        events = self.get_events()
+        if 0 <= index < len(events):
+            events.pop(index)
+            self.config.set("calendar_events", events)
+
+
+class HealthCalculator:
+    @staticmethod
+    def bmi(weight_kg: float, height_m: float) -> Dict:
+        bmi_value = weight_kg / (height_m ** 2)
+        if bmi_value < 18.5:
+            category = "Underweight"
+        elif 18.5 <= bmi_value < 25:
+            category = "Normal"
+        elif 25 <= bmi_value < 30:
+            category = "Overweight"
+        else:
+            category = "Obese"
+        return {"bmi": round(bmi_value, 1), "category": category}
+    
+    @staticmethod
+    def bmr(weight_kg: float, height_cm: float, age: int, gender: str) -> float:
+        if gender.lower() in ["male", "m"]:
+            return 10 * weight_kg + 6.25 * height_cm - 5 * age + 5
+        else:
+            return 10 * weight_kg + 6.25 * height_cm - 5 * age - 161
+    
+    @staticmethod
+    def tdee(bmr: float, activity_level: str) -> float:
+        multipliers = {"sedentary": 1.2, "light": 1.375, "moderate": 1.55, "active": 1.725, "very_active": 1.9}
+        return bmr * multipliers.get(activity_level.lower(), 1.2)
+
+
+class UrlShortener:
+    @staticmethod
+    def shorten(url: str) -> Optional[str]:
+        try:
+            api_url = f"https://tinyurl.com/api-create.php?url={urllib.parse.quote(url)}"
+            ctx = ssl.create_default_context()
+            ctx.check_hostname = False
+            ctx.verify_mode = ssl.CERT_NONE
+            req = urllib.request.Request(api_url)
+            with urllib.request.urlopen(req, context=ctx, timeout=10) as resp:
+                return resp.read().decode().strip()
+        except:
+            return None
+
+
 # ==================== INTENT PARSER ====================
 
 class IntentParser:
@@ -1489,6 +1834,14 @@ class IntentParser:
             "random user", "gender ", "nationality", "predict age",
             # Web Search
             "search ", "search for ", "google ", "look up ",
+            # Voice & System
+            "speak ", "speak:", "listen", "voice input", "shutdown", "restart", "lock", "sleep", "system info", "empty recycle",
+            # Utilities
+            "generate password", "password ", "clipboard", "copy to clipboard", "screenshot", "shorten url", "url shortener",
+            # Productivity
+            "add event", "calendar", "bmr ", "tdee ", "calorie",
+            # AI Chat
+            "ask ai", "chat with ai", "ai ", "ask gpt", "ask chatbot", "use ai", "deepseek", "llama",
         ]
         
         for cmd in command_starts:
@@ -1550,22 +1903,31 @@ class ProAI:
                       "to", "of", "in", "on", "at", "by", "from", "that", "this", "it", "its",
                       "your", "my", "his", "her", "their", "our", "be", "being", "been", "have", 
                       "has", "had", "i", "you", "we", "they", "he", "she", "name", "called", "mean",
-                      "good", "bad", "some", "one", "things", "thing", "much", "many"}
+                      "good", "bad", "some", "one", "things", "thing", "much", "many", "really",
+                      "type", "kind", "sort", "exactly", "work", "means", "meaning", "want", "need",
+                      "help", "like", "use", "get", "make", "create", "start", "begin"}
         
-        # Strategy 1: Pattern-based extraction
+        # Strategy 1: Pattern-based extraction (expanded)
         topic = ""
         patterns = [
             # What questions
             (r"what (?:is|are|was|were|do|does|did|can|could|would|should) (?:a |an |the )?(.+?)(?:\?|$)", 1),
             (r"what'?s (?:a |an |the )?(.+?)(?:\?|$)", 1),
+            (r"what kind of (.+?)(?:\?|$)", 1),
+            (r"what type of (.+?)(?:\?|$)", 1),
             # Who questions  
             (r"who (?:is|are|was|were|do|does|did|can|could|would|should) (?:the )?(.+?)(?:\?|$)", 1),
+            (r"who'?s (.+?)(?:\?|$)", 1),
             # How questions
             (r"how (?:do|does|did|can|could|would|should|to|many|much) (.+?)(?:\?|$)", 1),
+            (r"how'?s (.+?)(?:\?|$)", 1),
+            (r"how about (.+?)(?:\?|$)", 1),
             # Why questions
             (r"why (?:is|are|was|were|do|does|did|can|could|would|should|does) (.+?)(?:\?|$)", 1),
+            (r"why don'?t (.+?)(?:\?|$)", 1),
             # Where questions
             (r"where (?:is|are|was|were|do|does|did|can|could|would|should) (.+?)(?:\?|$)", 1),
+            (r"where'?s (.+?)(?:\?|$)", 1),
             # When questions
             (r"when (?:is|are|was|were|do|does|did|can|could|would|should) (.+?)(?:\?|$)", 1),
             # Other question patterns
@@ -1576,6 +1938,8 @@ class ProAI:
             (r"define (.+?)(?:\?|$)", 1),
             (r"give me info(?:rmation)? about (.+?)(?:\?|$)", 1),
             (r"info(?:rmation)? about (.+?)(?:\?|$)", 1),
+            (r"tell me (.+?)(?:\?|$)", 1),
+            (r"do you know (.+?)(?:\?|$)", 1),
         ]
         
         for pattern, group in patterns:
@@ -1612,7 +1976,7 @@ class ProAI:
         # Try Wikipedia summary (most comprehensive)
         wiki = WebAPIs.get_wikipedia_summary(topic)
         if wiki.get("success"):
-            return f"📖 {wiki['title']}\n\n{wiki['text'][:600]}\n\n🔗 {wiki.get('url', '')}"
+            return f"📖 {wiki['title']}\n\n{wiki['text'][:800]}\n\n🔗 {wiki.get('url', '')}"
         
         # Try dictionary for single words
         if len(topic.split()) == 1 and len(topic) < 20:
@@ -1626,7 +1990,7 @@ class ProAI:
                     result += f"({d['part']}) {d['def']}\n"
                 return result
         
-        # Try Wikipedia search
+        # Try web search as fallback
         search = WebAPIs.search_wikipedia(topic)
         if search.get("success"):
             results = search.get("results", [])
@@ -1636,6 +2000,14 @@ class ProAI:
                     desc = r['desc'][:100] + "..." if len(r['desc']) > 100 else r['desc']
                     result += f"• {r['title']}\n  {desc}\n\n"
                 return result
+        
+        # Try AI as final fallback (better response)
+        try:
+            result = FreeAIConnector.chat_with_ai(original, "torgpt")
+            if result.get("success"):
+                return f"🤖 {result['content']}\n\n💡 Tip: Ask 'ask ai [question]' for AI-powered answers!"
+        except:
+            pass
         
         # Generate smart response based on question type
         return self._generate_answer(topic, question_types, original)
@@ -1648,18 +2020,31 @@ class ProAI:
         if topic_clean in self.knowledge.data:
             return f"💡 {self.knowledge.data[topic_clean]}"
         
-        # Partial match - topic contains key
+        # Find best partial match (longest key that matches)
+        best_match = None
+        best_length = 0
         for key, value in self.knowledge.data.items():
             if key in topic_clean or topic_clean in key:
-                return f"💡 {key.title()}:\n\n{value}"
+                if len(key) > best_length:
+                    best_match = (key, value)
+                    best_length = len(key)
         
-        # Word match
+        if best_match:
+            return f"💡 {best_match[0].title()}:\n\n{best_match[1]}"
+        
+        # Word match - find key with most matching words
         topic_words = set(topic_clean.split())
+        best_word_match = None
+        best_word_count = 0
         for key, value in self.knowledge.data.items():
             key_words = set(key.split())
-            if topic_words & key_words:  # intersection
-                if len(topic_words & key_words) >= 1:
-                    return f"💡 {key.title()}:\n\n{value}"
+            matches = topic_words & key_words
+            if len(matches) >= 2 and len(matches) > best_word_count:
+                best_word_match = (key, value)
+                best_word_count = len(matches)
+        
+        if best_word_match:
+            return f"💡 {best_word_match[0].title()}:\n\n{best_word_match[1]}"
         
         return None
     
@@ -1669,82 +2054,83 @@ class ProAI:
         
         # If it's a "what is X" type question we couldn't answer
         if "definition" in qtypes or original.lower().startswith("what is") or original.lower().startswith("what's"):
-            return f"""I don't have specific information about '{topic}' in my knowledge base.
+            return f"""🤔 I don't have specific information about '{topic}' in my knowledge base.
 
-Here's what I can suggest:
-• Try asking about a specific topic I'm likely to know (tech, science, history, etc.)
-• Check Wikipedia for '{topic}'
-• Ask me a different question!
+💡 Suggestions:
+• Ask me about tech, science, history, health, business, sports, or entertainment
+• Try: 'search {topic}' to search the web
+• Or ask 'ask ai {topic}' for AI-generated answer
 
 What else can I help you with?"""
         
         # For "who is" questions
         if "person" in qtypes:
-            return f"I don't have information about '{topic}' in my database. You could try searching Wikipedia!"
+            return f"""👤 I don't have information about '{topic}' in my database.
+
+Try:
+• 'search {topic}' - to search online
+• 'ask ai who is {topic}' - for AI answer
+• 'wiki {topic}' - for Wikipedia"""
         
         # For "where" questions
         if "place" in qtypes:
-            return f"I'm not sure where '{topic}' is. Try being more specific or ask about a well-known location!"
+            return f"""📍 I'm not sure where '{topic}' is.
+
+Suggestions:
+• 'search where is {topic}' 
+• 'ask ai where is {topic}'
+• 'wiki {topic}' for location info"""
         
         # For "when" questions  
         if "time" in qtypes:
-            return f"I don't know when '{topic}' happened. Try asking about a specific event or date!"
+            return f"""📅 I don't know when '{topic}' happened.
+
+Try:
+• 'search when {topic}'
+• 'ask ai when did {topic} happen'
+• 'wiki {topic}' for historical events"""
         
         # For "how to" questions
         if "howto" in qtypes:
-            return f"To learn how to {topic}, I recommend:\n\n1. Search online tutorials\n2. Check YouTube for videos\n3. Find a beginner's guide\n4. Practice with small projects\n\nWhat specific aspect would you like help with?"
+            return f"""🛠️ To learn how to {topic}:
+
+1. Search online tutorials
+2. Check YouTube for videos  
+3. Find a beginner's guide
+4. Practice with small projects
+
+Or ask: 'ask ai how to {topic}' for step-by-step help!"""
         
         # For "why" questions
         if "why" in qtypes:
-            return f"That's an interesting question about '{topic}'!\n\nThere could be many reasons. Would you like me to try a Wikipedia search for '{topic}'?"
+            return f"""🤔 That's an interesting question about '{topic}'!
+
+There could be many reasons. Try:
+• 'ask ai why {topic}' - for detailed explanation
+• 'search why {topic}' - for multiple perspectives
+• 'wiki {topic}' - for factual information"""
+        
+        # For "how many/much" questions
+        if "quantity" in qtypes:
+            return f"""🔢 I don't have the exact number for '{topic}'.
+
+Try:
+• 'search how many {topic}'
+• 'ask ai how many {topic}'
+• 'wiki {topic}' for statistics"""
         
         # Generic fallback
-        return f"""I don't have specific information about '{topic}' in my knowledge base.
+        return f"""🤔 I don't have specific information about '{topic}'.
 
-You could try:
-• Asking about something else
-• Being more specific
-• Checking Wikipedia
+💡 What I can help with:
+• 'search [topic]' - Search the web
+• 'ask ai [question]' - Get AI answer
+• 'wiki [topic]' - Wikipedia info
+• 'define [word]' - Word definition
 
-I know A LOT about: technology, science, history, health, business, sports, entertainment, and more!
+I know lots about: technology, science, history, health, business, sports, entertainment, and more!
 
-What else would you like to know?"""
-        
-        # Try knowledge base (smart lookup)
-        kb_result = self._smart_kb_lookup(topic)
-        if kb_result:
-            return kb_result
-        
-        # Try Wikipedia summary
-        wiki = WebAPIs.get_wikipedia_summary(topic)
-        if wiki.get("success"):
-            return f"📖 {wiki['title']}\n\n{wiki['text'][:600]}\n\n🔗 {wiki.get('url', '')}"
-        
-        # Try dictionary for single words
-        if len(topic.split()) == 1 and len(topic) < 20:
-            definition = WebAPIs.define_word(topic)
-            if definition.get("success"):
-                result = f"📖 {definition['word']}"
-                if definition.get("phonetic"):
-                    result += f" {definition['phonetic']}"
-                result += "\n\n"
-                for d in definition.get("definitions", [])[:3]:
-                    result += f"({d['part']}) {d['def']}\n"
-                return result
-        
-        # Try Wikipedia search
-        search = WebAPIs.search_wikipedia(topic)
-        if search.get("success"):
-            results = search.get("results", [])
-            if results:
-                result = f"🔍 Results for '{topic}':\n\n"
-                for r in results[:4]:
-                    desc = r['desc'][:100] + "..." if len(r['desc']) > 100 else r['desc']
-                    result += f"• {r['title']}\n  {desc}\n\n"
-                return result
-        
-        # Generate smart response based on question type
-        return self._generate_answer(topic, qtypes, original)
+What would you like to try?"""
     
     def _handle_command(self, text: str) -> str:
         t = text.lower()
@@ -1998,6 +2384,147 @@ What else would you like to know?"""
         # System info
         if t in ["system", "system info", "systeminfo"]:
             return f"💻 System Info:\n\nOS: {platform.system()}\nOS Version: {platform.version()}\nMachine: {platform.machine()}\nProcessor: {platform.processor()}\nPython: {platform.python_version()}\nTime: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        
+        # Voice - Speak
+        if t.startswith("speak ") or "speak:" in t:
+            text_to_speak = text.split("speak ", 1)[1] if text.startswith("speak ") else text.split("speak:", 1)[1] if "speak:" in text else ""
+            if text_to_speak:
+                success = VoiceAssistant.speak(text_to_speak)
+                if success:
+                    return f"🗣️ Speaking: {text_to_speak}"
+                return "🗣️ Voice not available. Install pyttsx3 to enable."
+        
+        # Voice - Listen
+        if t in ["listen", "voice input", "voice"]:
+            text_heard = VoiceAssistant.listen()
+            if text_heard:
+                return f"🎤 Heard: {text_heard}"
+            return "🎤 Voice input not available. Install speech_recognition to enable."
+        
+        # System Commands
+        if "shutdown" in t:
+            delay = int(re.findall(r"\d+", t)[0]) if re.findall(r"\d+", t) else 0
+            return SystemCommands.shutdown(delay)
+        
+        if "restart" in t:
+            delay = int(re.findall(r"\d+", t)[0]) if re.findall(r"\d+", t) else 0
+            return SystemCommands.restart(delay)
+        
+        if "lock" in t:
+            return SystemCommands.lock()
+        
+        if "sleep" in t:
+            return SystemCommands.sleep()
+        
+        if "empty recycle" in t:
+            return SystemCommands.empty_recycle_bin()
+        
+        # Password Generator (enhanced)
+        if "generate password" in t or t.startswith("password "):
+            length_match = re.search(r"(\d+)", t)
+            length = int(length_match.group(1)) if length_match else 16
+            pwd = PasswordGenerator.generate(min(length, 64), include_special=True)
+            return f"🔐 Generated password ({len(pwd)} chars):\n{pwd}"
+        
+        # Clipboard
+        if "clipboard" in t:
+            if "copy" in t or "set" in t:
+                copy_text = text.split("clipboard", 1)[1].replace("copy", "").replace("set", "").replace("to", "").strip()
+                if copy_text:
+                    ClipboardManager.copy(copy_text)
+                    return f"📋 Copied to clipboard: {copy_text}"
+            elif "paste" in t or "get" in t:
+                content = ClipboardManager.paste()
+                if content:
+                    return f"📋 Clipboard content:\n{content}"
+                return "📋 Clipboard is empty"
+        
+        # Screenshot
+        if "screenshot" in t or "capture screen" in t:
+            filename = Screenshot.capture()
+            if filename:
+                return f"📸 Screenshot saved: {filename}"
+            return "📸 Screenshot not available. Install PIL to enable."
+        
+        # URL Shortener
+        if "shorten url" in t or "url shortener" in t:
+            url_match = re.search(r"(https?://[^\s]+|www\.[^\s]+)", text)
+            if url_match:
+                short_url = UrlShortener.shorten(url_match.group(1))
+                if short_url:
+                    return f"🔗 Short URL:\n{short_url}"
+            return "Could not shorten URL"
+        
+        # Calendar Events
+        if "add event" in t or "add calendar" in t:
+            match = re.search(r"event\s+(.+?)(?:\s+on\s+|\s+at\s+|$)(.+?)(?:\s+at\s+(\d{1,2}:\d{2}))?$", t)
+            if match:
+                title = match.group(1).strip()
+                date = match.group(2).strip() if match.group(2) else datetime.now().strftime("%Y-%m-%d")
+                time = match.group(3) if match.group(3) else None
+                cal = CalendarManager(self.config)
+                cal.add_event(title, date, time)
+                return f"📅 Event added: {title} on {date}"
+            event_text = text.split("add event ", 1)[1] if "add event " in t else ""
+            if event_text:
+                cal = CalendarManager(self.config)
+                cal.add_event(event_text, datetime.now().strftime("%Y-%m-%d"))
+                return f"📅 Event added: {event_text}"
+        
+        if "calendar" in t or "show events" in t:
+            cal = CalendarManager(self.config)
+            events = cal.get_events()
+            if events:
+                result = "📅 Calendar Events:\n\n"
+                for i, e in enumerate(events[-10:], 1):
+                    result += f"{i}. {e['title']} - {e['date']}"
+                    if e.get('time'):
+                        result += f" at {e['time']}"
+                    result += "\n"
+                return result
+            return "📅 No events. Say 'add event [title] on [date]'"
+        
+        # BMR Calculator
+        if "bmr" in t:
+            match = re.search(r"bmr\s+(\d+(?:\.\d+)?)\s*kg?\s+(\d+(?:\.\d+)?)\s*cm?\s+(\d+)\s*(male|female|m|f)?", t)
+            if match:
+                weight = float(match.group(1))
+                height = float(match.group(2))
+                age = int(match.group(3))
+                gender = match.group(4) if match.group(4) else "male"
+                bmr = HealthCalculator.bmr(weight, height, age, gender)
+                return f"🔥 BMR (Basal Metabolic Rate):\n\nWeight: {weight}kg\nHeight: {height}cm\nAge: {age}\nGender: {gender}\nBMR: {bmr:.0f} calories/day"
+        
+        # TDEE Calculator
+        if "tdee" in t:
+            match = re.search(r"tdee\s+(\d+(?:\.\d+)?)\s+(sedentary|light|moderate|active|very\s*active)", t)
+            if match:
+                bmr = float(match.group(1))
+                activity = match.group(2).replace(" ", "")
+                tdee = HealthCalculator.tdee(bmr, activity)
+                return f"🔥 TDEE (Total Daily Energy Expenditure):\n\nBMR: {bmr}\nActivity: {activity}\nTDEE: {tdee:.0f} calories/day"
+        
+        # AI Chat - Ask AI
+        ai_trigger = ["ask ai", "chat with ai", "ai ", "ask gpt", "ask chatbot", "use ai", "deepseek", "llama"]
+        if any(trigger in t for trigger in ai_trigger):
+            message = text
+            for trigger in ["ask ai ", "chat with ai ", "ai ", "ask gpt ", "ask chatbot ", "use ai ", "deepseek ", "llama "]:
+                message = message.replace(trigger, "", 1)
+            message = message.strip()
+            
+            provider = "torgpt"
+            if "deepseek" in t:
+                provider = "openrouter"
+            elif "llama" in t:
+                provider = "groq"
+            
+            api_key = self.config.get_key("openrouter") or self.config.get_key("groq") or ""
+            
+            result = FreeAIConnector.chat_with_ai(message, provider, api_key)
+            if result.get("success"):
+                return f"🤖 AI Response ({result.get('model', 'AI')}):\n\n{result['content']}"
+            else:
+                return f"❌ AI Error: {result.get('error', 'Connection failed')}\n\nTry again later or use a different provider."
         
         # Notes
         if "add note" in t:
