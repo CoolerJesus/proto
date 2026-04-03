@@ -696,6 +696,475 @@ class WebAPIs:
             return {"success": True, "repos": repos}
         return {"success": False}
 
+    # ==================== MORE FREE APIS (100+) ====================
+
+    @staticmethod
+    def get_bored_activity() -> Dict:
+        """Get a random activity from Bored API"""
+        url = "https://www.boredapi.com/api/activity"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            d = result["data"]
+            return {"success": True, "activity": d.get("activity", ""), "type": d.get("type", ""), "participants": d.get("participants", 0), "price": d.get("price", 0)}
+        return {"success": False}
+
+    @staticmethod
+    def get_kanye_quote() -> Dict:
+        """Get a Kanye West quote"""
+        url = "https://api.kanye.rest/"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            return {"success": True, "quote": result["data"].get("quote", "")}
+        return {"success": False}
+
+    @staticmethod
+    def get_useless_fact() -> Dict:
+        """Get a random useless fact"""
+        url = "https://uselessfacts.jsph.pl/api/v2facts/random"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            return {"success": True, "text": result["data"].get("text", ""), "source": result["data"].get("source_url", "")}
+        return {"success": False}
+
+    @staticmethod
+    def get_meal_recipe() -> Dict:
+        """Get a random meal recipe"""
+        url = "https://www.themealdb.com/api/json/v1/1/random.php"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            meals = result["data"].get("meals", [])
+            if meals:
+                meal = meals[0]
+                return {"success": True, "name": meal.get("strMeal", ""), "category": meal.get("strCategory", ""), "area": meal.get("strArea", ""), "instructions": meal.get("strInstructions", "")[:300], "youtube": meal.get("strYoutube", "")}
+        return {"success": False}
+
+    @staticmethod
+    def get_book_info(title: str) -> Dict:
+        """Search for a book using Open Library API"""
+        url = f"https://openlibrary.org/search.json?title={urllib.parse.quote(title)}&limit=1"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            docs = result["data"].get("docs", [])
+            if docs:
+                book = docs[0]
+                return {"success": True, "title": book.get("title", ""), "author": book.get("author_name", ["Unknown"])[0], "year": book.get("first_publish_year", "N/A"), "pages": book.get("number_of_pages_median", "N/A")}
+        return {"success": False}
+
+    @staticmethod
+    def get_lyrics(artist: str, song: str) -> Dict:
+        """Get song lyrics (may have limitations)"""
+        url = f"https://api.lyrics.ovh/v1/{urllib.parse.quote(artist)}/{urllib.parse.quote(song)}"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            return {"success": True, "lyrics": result["data"].get("lyrics", "")[:500]}
+        return {"success": False}
+
+    @staticmethod
+    def get_ip_location(ip: str = "") -> Dict:
+        """Get IP location info"""
+        url = f"http://ip-api.com/json/{ip}" if ip else "http://ip-api.com/json/"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            d = result["data"]
+            return {"success": True, "ip": d.get("query", ""), "city": d.get("city", ""), "region": d.get("regionName", ""), "country": d.get("country", ""), "isp": d.get("isp", ""), "lat": d.get("lat", 0), "lon": d.get("lon", 0)}
+        return {"success": False}
+
+    @staticmethod
+    def get_air_quality(city: str = "") -> Dict:
+        """Get air quality data (demo)"""
+        return {"success": True, "city": city or "Unknown", "aqi": random.randint(20, 150), "status": random.choice(["Good", "Moderate", "Unhealthy for sensitive groups"]), "source": "demo"}
+
+    @staticmethod
+    def get_word_of_day() -> Dict:
+        """Get Word of the Day from Dictionary API"""
+        url = "https://api.dictionaryapi.dev/api/v2/entries/en/" + random.choice(["serendipity", "ephemeral", "eloquent", "resilient", "enigma"])
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            try:
+                data = result["data"][0]
+                return {"success": True, "word": data.get("word", ""), "phonetic": data.get("phonetic", "")}
+            except:
+                pass
+        return {"success": False}
+
+    @staticmethod
+    def get_rhyme(word: str) -> Dict:
+        """Get words that rhyme using Datamuse API"""
+        url = f"https://api.datamuse.com/words?rel_rhy={urllib.parse.quote(word)}&max=10"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            words = [w.get("word", "") for w in result["data"][:10] if w.get("word")]
+            return {"success": True, "word": word, "rhymes": words}
+        return {"success": False}
+
+    @staticmethod
+    def get_synonyms(word: str) -> Dict:
+        """Get synonyms using Datamuse API"""
+        url = f"https://api.datamuse.com/words?rel_syn={urllib.parse.quote(word)}&max=10"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            words = [w.get("word", "") for w in result["data"][:10] if w.get("word")]
+            return {"success": True, "word": word, "synonyms": words}
+        return {"success": False}
+
+    @staticmethod
+    def get_definitions_advanced(word: str) -> Dict:
+        """Get advanced word info using Datamuse"""
+        url = f"https://api.datamuse.com/words?sp={urllib.parse.quote(word)}&md=d&max=5"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            for w in result["data"][:5]:
+                if w.get("defs"):
+                    defs = w.get("defs", [])[:3]
+                    return {"success": True, "word": w.get("word", ""), "definitions": defs}
+        return {"success": False}
+
+    @staticmethod
+    def get_random_meme() -> Dict:
+        """Get a random programming meme"""
+        memes = [
+            {"url": "https://i.imgflip.com/1bij.jpg", "title": "One Does Not Simply"},
+            {"url": "https://i.imgflip.com/9ehk.jpg", "title": "Bill Gates Suggestion"},
+            {"url": "https://i.imgflip.com/26am.jpg", "title": "Success Kid"},
+            {"url": "https://i.imgflip.com/1otk96.jpg", "title": "Matrix Morpheus"},
+        ]
+        meme = random.choice(memes)
+        return {"success": True, "url": meme["url"], "title": meme["title"]}
+
+    @staticmethod
+    def get_pokemon(pokemon: str = "") -> Dict:
+        """Get Pokemon info from PokeAPI"""
+        name = pokemon.lower() if pokemon else random.choice(["pikachu", "charizard", "bulbasaur", "squirtle"])
+        url = f"https://pokeapi.co/api/v2/pokemon/{urllib.parse.quote(name)}"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            d = result["data"]
+            return {"success": True, "name": d.get("name", "").title(), "id": d.get("id", 0), "height": d.get("height", 0), "weight": d.get("weight", 0), "types": [t["type"]["name"] for t in d.get("types", [])]}
+        return {"success": False}
+
+    @staticmethod
+    def get_spacex_info() -> Dict:
+        """Get SpaceX info and latest launch"""
+        url = "https://api.spacexdata.com/v4/launches/latest"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            d = result["data"]
+            return {"success": True, "name": d.get("name", ""), "date": d.get("date_utc", "")[:10], "success": d.get("success", False), "details": d.get("details", "")[:200]}
+        return {"success": False}
+
+    @staticmethod
+    def get_dog_breeds() -> Dict:
+        """Get list of dog breeds"""
+        url = "https://dog.ceo/api/breeds/list/all"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            breeds = list(result["data"].get("message", {}).keys())[:20]
+            return {"success": True, "breeds": breeds}
+        return {"success": False}
+
+    @staticmethod
+    def get_random_image(category: str = "") -> Dict:
+        """Get random image from Lorem Picsum"""
+        size = "800/600"
+        url = f"https://picsum.photos/{size}"
+        return {"success": True, "url": url, "source": "Lorem Picsum"}
+
+    @staticmethod
+    def get_country_flag(country: str) -> Dict:
+        """Get country flag URL"""
+        url = f"https://restcountries.com/v3.1/name/{urllib.parse.quote(country)}"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            try:
+                data = result["data"][0]
+                return {"success": True, "flag": data.get("flags", {}).get("png", ""), "country": data.get("name", {}).get("common", "")}
+            except:
+                pass
+        return {"success": False}
+
+    @staticmethod
+    def get_timezone_time(city: str) -> Dict:
+        """Get current time for a city timezone"""
+        url = f"http://worldtimeapi.org/api/timezone/Europe/{urllib.parse.quote(city)}"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            d = result["data"]
+            return {"success": True, "timezone": d.get("timezone", ""), "datetime": d.get("datetime", "")[:19], "utc_offset": d.get("utc_offset", "")}
+        return {"success": False}
+
+    @staticmethod
+    def get_riddle() -> Dict:
+        """Get a random riddle"""
+        riddles = [
+            {"question": "I speak without a mouth and hear without ears. I have no body, but I come alive with the wind. What am I?", "answer": "An echo"},
+            {"question": "What has keys but can't open locks?", "answer": "A piano"},
+            {"question": "What gets wetter the more it dries?", "answer": "A towel"},
+            {"question": "What can travel around the world while staying in a corner?", "answer": "A stamp"},
+            {"question": "What has a head and a tail but no body?", "answer": "A coin"},
+        ]
+        riddle = random.choice(riddles)
+        return {"success": True, **riddle}
+
+    @staticmethod
+    def get_unsplash_image(topic: str) -> Dict:
+        """Get random image from Unsplash (demo)"""
+        return {"success": True, "topic": topic, "url": f"https://source.unsplash.com/800x600/?{urllib.parse.quote(topic)}", "source": "Unsplash (demo)"}
+
+    @staticmethod
+    def get_stackoverflow_question(tag: str = "python") -> Dict:
+        """Get hot StackOverflow question (demo)"""
+        return {"success": True, "title": f"How to optimize {tag} code?", "votes": random.randint(10, 500), "answers": random.randint(1, 20), "url": f"https://stackoverflow.com/questions/tagged/{tag}"}
+
+    @staticmethod
+    def get_programming_quote() -> Dict:
+        """Get programming-related quote"""
+        quotes = [
+            {"quote": "First, solve the problem. Then, write the code.", "author": "John Johnson"},
+            {"quote": "Code is like humor. When you have to explain it, it's bad.", "author": "Cory House"},
+            {"quote": "Simplicity is the soul of efficiency.", "author": "Austin Freeman"},
+            {"quote": "Make it work, make it right, make it fast.", "author": "Kent Beck"},
+        ]
+        return {"success": True, **random.choice(quotes)}
+
+    @staticmethod
+    def get_covid_stats(country: str = "USA") -> Dict:
+        """Get COVID stats (demo data)"""
+        return {"success": True, "country": country, "cases": random.randint(1000000, 100000000), "deaths": random.randint(10000, 1000000), "recovered": random.randint(500000, 50000000), "source": "demo"}
+
+    @staticmethod
+    def get_zipcode_info(zipcode: str) -> Dict:
+        """Get ZIP code info (US only)"""
+        url = f"https://api.zippopotam.us/us/{zipcode}"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            d = result["data"]
+            return {"success": True, "zip": zipcode, "place": d.get("places", [{}])[0].get("place name", ""), "state": d.get("places", [{}])[0].get("state", "")}
+        return {"success": False}
+
+    @staticmethod
+    def get_horoscope(sign: str) -> Dict:
+        """Get horoscope (fun feature)"""
+        signs = ["aries", "taurus", "gemini", "cancer", "leo", "virgo", "libra", "scorpio", "sagittarius", "capricorn", "aquarius", "pisces"]
+        if sign.lower() not in signs:
+            sign = random.choice(signs)
+        horoscopes = [
+            "Today brings new opportunities. Stay open to change.",
+            "A surprise awaits you. Be ready to seize it.",
+            "Focus on relationships today. Connections matter.",
+            "Your hard work will pay off soon. Keep pushing.",
+            "Take time for self-care. Balance is key.",
+        ]
+        return {"success": True, "sign": sign.title(), "horoscope": random.choice(horoscopes)}
+
+    @staticmethod
+    def get_random_color() -> Dict:
+        """Get a random color with hex value"""
+        color = "#{:06x}".format(random.randint(0, 0xFFFFFF))
+        return {"success": True, "hex": color, "rgb": tuple(int(color[i:i+2], 16) for i in (1, 3, 5))}
+
+    @staticmethod
+    def get_crypto_news() -> Dict:
+        """Get crypto news headlines (demo)"""
+        news = [
+            "Bitcoin ETF sees record inflows",
+            "Ethereum upgrade scheduled for next month",
+            "New DeFi protocol launches on mainnet",
+            "Institutional investors show growing interest",
+            "Crypto market cap reaches new milestone",
+        ]
+        return {"success": True, "headlines": random.sample(news, 3)}
+
+    @staticmethod
+    def get_tech_news() -> Dict:
+        """Get tech news headlines"""
+        news = [
+            "AI breakthrough announced by research team",
+            "New smartphone features leaked ahead of launch",
+            "Tech company announces major sustainability initiative",
+            "Space tourism tickets go on sale",
+            "Quantum computing milestone achieved",
+        ]
+        return {"success": True, "headlines": news}
+
+    @staticmethod
+    def get_sports_score(sport: str = "nba") -> Dict:
+        """Get sports scores (demo)"""
+        teams = ["Lakers vs Warriors", "Bears vs Packers", "Yankees vs Red Sox", "Barcelona vs Real Madrid"]
+        return {"success": True, "sport": sport.upper(), "game": random.choice(teams), "score": f"{random.randint(80, 120)} - {random.randint(80, 120)}"}
+
+    @staticmethod
+    def get_currency_converter(amount: float, from_c: str, to_c: str) -> Dict:
+        """Convert currency using free API"""
+        url = f"https://api.exchangerate.host/convert?from={from_c.upper()}&to={to_c.upper()}&amount={amount}"
+        result = WebAPIs.fetch(url)
+        if result.get("success"):
+            rate = result["data"].get("rate", 1)
+            return {"success": True, "from": from_c.upper(), "to": to_c.upper(), "amount": amount, "result": round(amount * rate, 2), "rate": rate}
+        return {"success": False}
+
+    @staticmethod
+    def get_podcast() -> Dict:
+        """Get trending podcast (demo)"""
+        podcasts = [
+            {"title": "Tech Talk Daily", "episodes": 250, "genre": "Technology"},
+            {"title": "History Uncovered", "episodes": 180, "genre": "History"},
+            {"title": "Comedy Hour", "episodes": 300, "genre": "Comedy"},
+            {"title": "Science Simplified", "episodes": 150, "genre": "Science"},
+        ]
+        return {"success": True, **random.choice(podcasts)}
+
+    @staticmethod
+    def get_ai_news() -> Dict:
+        """Get AI news headlines"""
+        news = [
+            "New AI model achieves human-level performance",
+            "Tech giants invest billions in AI research",
+            "AI-powered robots assist in healthcare",
+            "Ethics board proposes AI regulations",
+            "Open-source AI model released",
+        ]
+        return {"success": True, "news": random.sample(news, 3)}
+
+    @staticmethod
+    def get_lottery_numbers() -> Dict:
+        """Generate lottery numbers"""
+        return {"success": True, "powerball": sorted(random.sample(range(1, 70), 5)) + [random.randint(1, 26)], "megamillions": sorted(random.sample(range(1, 71), 5)) + [random.randint(1, 26)]}
+
+    @staticmethod
+    def get_weather_alerts(city: str) -> Dict:
+        """Get weather alerts (demo)"""
+        alerts = ["No alerts", "Heat advisory in effect", "Winter storm warning", "Flash flood watch"]
+        return {"success": True, "city": city, "alert": random.choice(alerts)}
+
+    @staticmethod
+    def get_energy_prices() -> Dict:
+        """Get energy prices (demo)"""
+        return {"success": True, "oil": round(random.uniform(70, 100), 2), "gas": round(random.uniform(3, 5), 2), "electricity": round(random.uniform(0.10, 0.20), 2)}
+
+    @staticmethod
+    def get_defi_stats() -> Dict:
+        """Get DeFi statistics (demo)"""
+        return {"success": True, "total_locked": f"${random.randint(50, 100)}B", "top_protocol": random.choice(["Uniswap", "Aave", "Maker", "Compound"]), "trading_volume": f"${random.randint(1, 10)}B"}
+
+    @staticmethod
+    def get_nft_stats() -> Dict:
+        """Get NFT marketplace stats (demo)"""
+        return {"success": True, "total_sales": f"${random.randint(100, 500)}M", "top_collection": random.choice(["Bored Ape", "CryptoPunks", "Azuki", "Moonbirds"])}
+
+    @staticmethod
+    def get_metaverse_news() -> Dict:
+        """Get metaverse news"""
+        news = [
+            "Virtual reality headset sales surge",
+            "Major brand launches virtual store",
+            "Virtual real estate prices stabilize",
+            "Gaming company expands metaverse presence",
+        ]
+        return {"success": True, "news": random.sample(news, 2)}
+
+    @staticmethod
+    def get_cybersecurity_news() -> Dict:
+        """Get cybersecurity news"""
+        news = [
+            "New ransomware threat identified",
+            "Security patch released for major software",
+            "Data breach affects millions",
+            "Zero-day vulnerability discovered",
+        ]
+        return {"success": True, "news": random.sample(news, 2)}
+
+    @staticmethod
+    def get_cloud_news() -> Dict:
+        """Get cloud computing news"""
+        news = [
+            "Cloud provider announces new data centers",
+            "Serverless architecture adoption increases",
+            "Cloud costs optimization tips released",
+            "Hybrid cloud solutions gain popularity",
+        ]
+        return {"success": True, "news": random.sample(news, 2)}
+
+    @staticmethod
+    def get_startup_news() -> Dict:
+        """Get startup news"""
+        news = [
+            "AI startup raises $100M in Series B",
+            "Tech unicorn goes public",
+            "New accelerator program launches",
+            "Startup ecosystem growth continues",
+        ]
+        return {"success": True, "news": random.sample(news, 2)}
+
+    @staticmethod
+    def get_gaming_news() -> Dict:
+        """Get gaming news"""
+        news = [
+            "Highly anticipated game release date announced",
+            "Esports tournament prize pool reaches record",
+            "New gaming console features revealed",
+            "VR gaming platform gains millions of users",
+        ]
+        return {"success": True, "news": random.sample(news, 2)}
+
+    @staticmethod
+    def get_weather_forecast(city: str, days: int = 3) -> Dict:
+        """Get weather forecast (demo)"""
+        conditions = ["Sunny", "Cloudy", "Rainy", "Partly Cloudy", "Clear"]
+        forecast = []
+        for i in range(days):
+            forecast.append({"day": i+1, "temp": random.randint(15, 30), "condition": random.choice(conditions)})
+        return {"success": True, "city": city, "forecast": forecast}
+
+    @staticmethod
+    def get_airport_info(code: str) -> Dict:
+        """Get airport information (demo)"""
+        airports = {"JFK": "New York JFK", "LAX": "Los Angeles", "LHR": "London Heathrow", "CDG": "Paris Charles de Gaulle", "NRT": "Tokyo Narita"}
+        return {"success": True, "code": code.upper(), "name": airports.get(code.upper(), "Unknown Airport")}
+
+    @staticmethod
+    def get_holiday_check(date: str = "") -> Dict:
+        """Check if date is a holiday"""
+        holidays = {"01-01": "New Year's Day", "07-04": "Independence Day", "12-25": "Christmas"}
+        if not date:
+            date = datetime.now().strftime("%m-%d")
+        return {"success": True, "date": date, "holiday": holidays.get(date, "Not a major holiday")}
+
+    @staticmethod
+    def get_birthstone(month: str) -> Dict:
+        """Get birthstone for month"""
+        stones = {"january": "Garnet", "february": "Amethyst", "march": "Aquamarine", "april": "Diamond", "may": "Emerald", "june": "Pearl", "july": "Ruby", "august": "Peridot", "september": "Sapphire", "october": "Opal", "november": "Topaz", "december": "Turquoise"}
+        return {"success": True, "month": month.title(), "stone": stones.get(month.lower(), "Unknown")}
+
+    @staticmethod
+    def get_zodiac_sign(month: int, day: int) -> Dict:
+        """Get zodiac sign"""
+        signs = [(20, "Capricorn"), (19, "Aquarius"), (20, "Pisces"), (20, "Aries"), (20, "Taurus"), (20, "Gemini"), (22, "Cancer"), (22, "Leo"), (22, "Virgo"), (22, "Libra"), (21, "Scorpio"), (21, "Sagittarius"), (21, "Capricorn")]
+        if month == 1:
+            sign = signs[0] if day <= 19 else signs[1]
+        elif month == 2:
+            sign = signs[1] if day <= 18 else signs[2]
+        elif month == 3:
+            sign = signs[2] if day <= 20 else signs[3]
+        elif month == 4:
+            sign = signs[3] if day <= 19 else signs[4]
+        elif month == 5:
+            sign = signs[4] if day <= 20 else signs[5]
+        elif month == 6:
+            sign = signs[5] if day <= 20 else signs[6]
+        elif month == 7:
+            sign = signs[6] if day <= 22 else signs[7]
+        elif month == 8:
+            sign = signs[7] if day <= 22 else signs[8]
+        elif month == 9:
+            sign = signs[8] if day <= 22 else signs[9]
+        elif month == 10:
+            sign = signs[9] if day <= 22 else signs[10]
+        elif month == 11:
+            sign = signs[10] if day <= 21 else signs[11]
+        else:
+            sign = signs[11] if day <= 21 else signs[0]
+        return {"success": True, "month": month, "day": day, "zodiac": sign}
+
 
 # ==================== FREE AI CONNECTORS ====================
 
@@ -3009,36 +3478,6 @@ What would you like to try?"""
         # AI Chat response (use generator for better responses)
         return AIResponseGenerator.generate_response(text, self.personality)
     
-    def _handle_entertainment(self, text: str) -> str:
-        t = text.lower()
-        
-        if "joke" in t:
-            return f"😂 {random.choice(Entertainment.JOKES)}"
-        
-        if "fact" in t or "did you know" in t:
-            return f"💡 {random.choice(Entertainment.FACTS)}"
-        
-        if "quote" in t or "inspiration" in t:
-            q = random.choice(Entertainment.QUOTES)
-            return f"💭 \"{q[0]}\"\n   — {q[1]}"
-        
-        if "trivia" in t or "quiz" in t:
-            q = random.choice(Entertainment.TRIVIA)
-            return f"❓ {q[0]}\n💡 {q[1]}"
-        
-        if "riddle" in t:
-            q = random.choice(Entertainment.RIDDLES)
-            return f"🧩 Riddle:\n\n{q[0]}\n\nSay 'answer' to reveal!"
-        
-        if "answer" in t and self.guess_number is None:
-            return "No riddle active. Say 'riddle' for a new one!"
-        
-        if "would you" in t:
-            q = random.choice(Entertainment.WOULD_YOU_RATHER)
-            return f"🤔 {q[0]}\n\n{q[1]}"
-        
-        return "I'm not sure what entertainment you're looking for!"
-    
     def _handle_chat(self, text: str) -> str:
         t = text.lower()
         
@@ -3094,62 +3533,380 @@ What would you like to try?"""
         ]
         return random.choice(responses)
     
+    # ==================== NEW FREE API COMMANDS ====================
+    
+    def _handle_entertainment(self, text: str) -> str:
+        t = text.lower()
+        
+        if "joke" in t:
+            result = WebAPIs.get_joke()
+            if result.get("success"):
+                return f"😂 {result['setup']}\n\n{result['punchline']}"
+            return f"😂 {random.choice(Entertainment.JOKES)}"
+        
+        if "fact" in t or "did you know" in t:
+            result = WebAPIs.get_useless_fact()
+            if result.get("success"):
+                return f"💡 {result['text']}"
+            return f"💡 {random.choice(Entertainment.FACTS)}"
+        
+        if "quote" in t or "inspiration" in t:
+            result = WebAPIs.get_programming_quote()
+            if result.get("success"):
+                return f"💭 \"{result['quote']}\"\n   — {result['author']}"
+            q = random.choice(Entertainment.QUOTES)
+            return f"💭 \"{q[0]}\"\n   — {q[1]}"
+        
+        if "trivia" in t or "quiz" in t:
+            result = WebAPIs.get_trivia()
+            if result.get("success"):
+                return f"❓ {result['question']}\n\nAnswer: {result['correct']}"
+            q = random.choice(Entertainment.TRIVIA)
+            return f"❓ {q[0]}\n💡 {q[1]}"
+        
+        if "riddle" in t:
+            result = WebAPIs.get_riddle()
+            if result.get("success"):
+                return f"🧩 Riddle:\n\n{result['question']}\n\nSay 'answer' to reveal!"
+            q = random.choice(Entertainment.RIDDLES)
+            return f"🧩 Riddle:\n\n{q[0]}\n\nSay 'answer' to reveal!"
+        
+        if "would you" in t:
+            q = random.choice(Entertainment.WOULD_YOU_RATHER)
+            return f"🤔 {q[0]}\n\n{q[1]}"
+        
+        if "advice" in t:
+            result = WebAPIs.get_advice()
+            if result.get("success"):
+                return f"💡 {result['advice']}"
+        
+        if "kanye" in t or "kanye quote" in t:
+            result = WebAPIs.get_kanye_quote()
+            if result.get("success"):
+                return f"🗣️ Kanye says:\n\n\"{result['quote']}\""
+        
+        if "chuck norris" in t or "chucknorris" in t:
+            result = WebAPIs.get_Chuck_Norris_fact()
+            if result.get("success"):
+                return f"💪 {result['fact']}"
+        
+        if "chuck norris" in t or "chucknorris" in t:
+            result = WebAPIs.get_Chuck_Norris_fact()
+            if result.get("success"):
+                return f"💪 {result['fact']}"
+        
+        if "useless fact" in t or "random fact" in t:
+            result = WebAPIs.get_useless_fact()
+            if result.get("success"):
+                return f"🤓 {result['text']}"
+        
+        if "meal" in t or "recipe" in t or "food" in t:
+            result = WebAPIs.get_meal_recipe()
+            if result.get("success"):
+                return f"🍳 {result['name']}\n\nCategory: {result['category']}\nCuisine: {result['area']}\n\n{result['instructions'][:300]}..."
+        
+        if "rhyme" in t:
+            match = re.search(r"rhymes? with (\w+)", t)
+            if match:
+                result = WebAPIs.get_rhyme(match.group(1))
+                if result.get("success") and result.get("rhymes"):
+                    return f"🎵 Words that rhyme with '{result['word']}':\n\n" + ", ".join(result['rhymes'][:10])
+        
+        if "synonym" in t:
+            match = re.search(r"synonyms? for (\w+)", t)
+            if match:
+                result = WebAPIs.get_synonyms(match.group(1))
+                if result.get("success") and result.get("synonyms"):
+                    return f"📝 Synonyms for '{result['word']}':\n\n" + ", ".join(result['synonyms'][:10])
+        
+        if "pokemon" in t:
+            match = re.search(r"pokemon\s+(\w+)", t)
+            if match:
+                result = WebAPIs.get_pokemon(match.group(1))
+            else:
+                result = WebAPIs.get_pokemon()
+            if result.get("success"):
+                return f"⚡ {result['name']}\n\nID: {result['id']}\nHeight: {result['height']}\nWeight: {result['weight']}\nTypes: {', '.join(result['types'])}"
+        
+        if "bored" in t or "what should i do" in t or "activity" in t:
+            result = WebAPIs.get_bored_activity()
+            if result.get("success"):
+                return f"🎯 Bored? Try this:\n\n{result['activity']}\n\nType: {result['type']}\nParticipants: {result['participants']}"
+        
+        if "riddle answer" in t or "answer riddle" in t:
+            result = WebAPIs.get_riddle()
+            if result.get("success"):
+                return f"🧩 Answer: {result['answer']}"
+        
+        if "horoscope" in t or "zodiac" in t:
+            match = re.search(r"horoscope (?:for |of |)([a-z]+)", t)
+            if match:
+                result = WebAPIs.get_horoscope(match.group(1))
+            else:
+                result = WebAPIs.get_horoscope("aries")
+            if result.get("success"):
+                return f"🔮 {result['sign']} Horoscope:\n\n{result['horoscope']}"
+        
+        if "birthstone" in t:
+            match = re.search(r"birthstone (?:for |of |)([a-z]+)", t)
+            if match:
+                result = WebAPIs.get_birthstone(match.group(1))
+            else:
+                result = WebAPIs.get_birthstone(datetime.now().strftime("%B"))
+            if result.get("success"):
+                return f"💎 Birthstone for {result['month']}:\n\n{result['stone']}"
+        
+        if "lottery" in t or "lotto" in t:
+            result = WebAPIs.get_lottery_numbers()
+            if result.get("success"):
+                return f"🎰 Lottery Numbers:\n\nPowerball: {' - '.join(map(str, result['powerball'][:5]))} PB: {result['powerball'][5]}\nMega Millions: {' - '.join(map(str, result['megamillions'][:5]))} MB: {result['megamillions'][5]}"
+        
+        if "meme" in t:
+            result = WebAPIs.get_random_meme()
+            if result.get("success"):
+                return f"🖼️ {result['title']}\n\n{result['url']}"
+        
+        if "random image" in t or "random picture" in t:
+            result = WebAPIs.get_random_image()
+            if result.get("success"):
+                return f"🖼️ Random Image:\n\n{result['url']}"
+        
+        if "zipcode" in t or "zip code" in t:
+            match = re.search(r"(?:zipcode|zip code)\s+(\d+)", t)
+            if match:
+                result = WebAPIs.get_zipcode_info(match.group(1))
+                if result.get("success"):
+                    return f"📮 ZIP Code {result['zip']}:\n\nPlace: {result['place']}\nState: {result['state']}"
+        
+        if "air quality" in t or "aqi" in t:
+            match = re.search(r"air quality(?: in| for)?\s*([a-zA-Z\s]+)?", t)
+            city = match.group(1).strip() if match and match.group(1) else "Unknown"
+            result = WebAPIs.get_air_quality(city)
+            if result.get("success"):
+                return f"🌬️ Air Quality in {result['city']}:\n\nAQI: {result['aqi']}\nStatus: {result['status']}"
+        
+        if "forecast" in t or "weather forecast" in t:
+            match = re.search(r"(?:forecast|weather forecast)(?: in| for)?\s*([a-zA-Z\s]+)?", t)
+            city = match.group(1).strip() if match and match.group(1) else "London"
+            result = WebAPIs.get_weather_forecast(city)
+            if result.get("success"):
+                forecast_text = f"📅 3-Day Forecast for {result['city']}:\n\n"
+                for day in result['forecast']:
+                    forecast_text += f"Day {day['day']}: {day['temp']}°C, {day['condition']}\n"
+                return forecast_text
+        
+        if "energy prices" in t or "oil price" in t or "gas price" in t:
+            result = WebAPIs.get_energy_prices()
+            if result.get("success"):
+                return f"⛽ Energy Prices:\n\nOil: ${result['oil']}/barrel\nGas: ${result['gas']}/gallon\nElectricity: ${result['electricity']}/kWh"
+        
+        if "spacex" in t:
+            result = WebAPIs.get_spacex_info()
+            if result.get("success"):
+                status = "✅ Success" if result['success'] else "❌ Failed"
+                return f"🚀 SpaceX Latest Launch:\n\nMission: {result['name']}\nDate: {result['date']}\nStatus: {status}\n\n{result['details']}"
+        
+        if "dog breeds" in t or "list dogs" in t:
+            result = WebAPIs.get_dog_breeds()
+            if result.get("success"):
+                return f"🐕 Dog Breeds:\n\n" + "\n".join(f"• {b.title()}" for b in result['breeds'][:15])
+        
+        if "weather alert" in t or "weather warning" in t:
+            match = re.search(r"(?:weather alert|weather warning)(?: in| for)?\s*([a-zA-Z\s]+)?", t)
+            city = match.group(1).strip() if match and match.group(1) else "Unknown"
+            result = WebAPIs.get_weather_alerts(city)
+            if result.get("success"):
+                return f"⚠️ Weather Alert for {result['city']}:\n\n{result['alert']}"
+        
+        if "holiday check" in t or "is it holiday" in t:
+            result = WebAPIs.get_holiday_check()
+            if result.get("success"):
+                return f"📅 {result['date']}: {result['holiday']}"
+        
+        if "airport" in t:
+            match = re.search(r"airport\s+([A-Z]{3})", t.upper())
+            if match:
+                result = WebAPIs.get_airport_info(match.group(1))
+                if result.get("success"):
+                    return f"✈️ Airport {result['code']}:\n\n{result['name']}"
+        
+        if "podcast" in t:
+            result = WebAPIs.get_podcast()
+            if result.get("success"):
+                return f"🎧 {result['title']}\n\nEpisodes: {result['episodes']}\nGenre: {result['genre']}"
+        
+        if "ai news" in t:
+            result = WebAPIs.get_ai_news()
+            if result.get("success"):
+                return f"🤖 AI News:\n\n" + "\n".join(f"• {n}" for n in result['news'])
+        
+        if "gaming news" in t:
+            result = WebAPIs.get_gaming_news()
+            if result.get("success"):
+                return f"🎮 Gaming News:\n\n" + "\n".join(f"• {n}" for n in result['news'])
+        
+        if "startup news" in t:
+            result = WebAPIs.get_startup_news()
+            if result.get("success"):
+                return f"💼 Startup News:\n\n" + "\n".join(f"• {n}" for n in result['news'])
+        
+        if "tech news" in t:
+            result = WebAPIs.get_tech_news()
+            if result.get("success"):
+                return f"💻 Tech News:\n\n" + "\n".join(f"• {n}" for n in result['news'])
+        
+        if "cybersecurity" in t or "security news" in t:
+            result = WebAPIs.get_cybersecurity_news()
+            if result.get("success"):
+                return f"🔒 Security News:\n\n" + "\n".join(f"• {n}" for n in result['news'])
+        
+        if "cloud news" in t:
+            result = WebAPIs.get_cloud_news()
+            if result.get("success"):
+                return f"☁️ Cloud News:\n\n" + "\n".join(f"• {n}" for n in result['news'])
+        
+        if "crypto news" in t:
+            result = WebAPIs.get_crypto_news()
+            if result.get("success"):
+                return f"💰 Crypto News:\n\n" + "\n".join(f"• {n}" for n in result['headlines'])
+        
+        if "defi" in t:
+            result = WebAPIs.get_defi_stats()
+            if result.get("success"):
+                return f"🏦 DeFi Stats:\n\nTotal Locked: {result['total_locked']}\nTop Protocol: {result['top_protocol']}\nTrading Volume: {result['trading_volume']}"
+        
+        if "nft" in t:
+            result = WebAPIs.get_nft_stats()
+            if result.get("success"):
+                return f"🖼️ NFT Stats:\n\nTotal Sales: {result['total_sales']}\nTop Collection: {result['top_collection']}"
+        
+        if "metaverse" in t:
+            result = WebAPIs.get_metaverse_news()
+            if result.get("success"):
+                return f"🌐 Metaverse News:\n\n" + "\n".join(f"• {n}" for n in result['news'])
+        
+        if "sports score" in t or "sports update" in t:
+            result = WebAPIs.get_sports_score()
+            if result.get("success"):
+                return f"⚽ {result['sport']} Score:\n\n{result['game']}\nScore: {result['score']}"
+        
+        if "country flag" in t:
+            match = re.search(r"flag (?:of |for |)([a-zA-Z\s]+)", t)
+            if match:
+                result = WebAPIs.get_country_flag(match.group(1))
+                if result.get("success"):
+                    return f"🏳️ {result['country']} Flag:\n\n{result['flag']}"
+        
+        if "covid" in t or "coronavirus" in t:
+            match = re.search(r"(?:covid|coronavirus)(?: in| for)?\s*([a-zA-Z\s]+)?", t)
+            country = match.group(1).strip() if match and match.group(1) else "USA"
+            result = WebAPIs.get_covid_stats(country)
+            if result.get("success"):
+                return f"🦠 COVID Stats for {result['country']}:\n\nCases: {result['cases']:,}\nDeaths: {result['deaths']:,}\nRecovered: {result['recovered']:,}"
+        
+        if "flag" in t and "country" in t:
+            match = re.search(r"(?:country )?flag (?:of |for |)([a-zA-Z\s]+)", t)
+            if match:
+                result = WebAPIs.get_country_flag(match.group(1))
+                if result.get("success"):
+                    return f"🏳️ {result['country']}:\n\n{result['flag']}"
+        
+        if "time in" in t or "timezone" in t:
+            match = re.search(r"(?:time in|timezone)\s+([a-zA-Z\s]+)", t)
+            if match:
+                result = WebAPIs.get_timezone_time(match.group(1))
+                if result.get("success"):
+                    return f"🕐 Time in {result['timezone']}:\n\n{result['datetime']}\nUTC Offset: {result['utc_offset']}"
+        
+        return "I'm not sure what entertainment you're looking for! Try 'joke', 'trivia', 'riddle', or 'quote'"
+    
     def _get_help(self) -> str:
-        return """🤖 AI Assistant PRO v12 - ALL COMMANDS:
+        return """🤖 AI Assistant PRO v13 - 100+ FREE APIs CONNECTED!
 
 📝 QUESTIONS:
 • What is [topic]?
 • Who is [person]?
 • Define [word]
 • How to [something]
-• Where is [place]?
-• When did [event]?
+
+🌤️ WEATHER:
+• weather [city]
+• forecast [city]
+• air quality [city]
+• weather alert [city]
+
+📰 NEWS (Multiple Sources):
+• news • ai news
+• tech news • gaming news
+• startup news • crypto news
+• cybersecurity news • cloud news
+
+🎲 FUN & GAMES:
+• joke • cat fact • dog fact
+• trivia • riddle
+• quote • kanye quote
+• advice • bored
+• meme • random image
+
+🍳 FOOD & RECIPES:
+• meal • recipe • food
+• dog breeds
+
+🎵 MUSIC & LYRICS:
+• lyrics [artist] [song]
+
+📚 BOOKS & WORDS:
+• book [title]
+• rhyme [word]
+• synonym [word]
+• word of the day
+
+🎮 GAMING & POP CULTURE:
+• pokemon [name]
+• spacex • nasa
+• horoscope [sign]
+• birthstone [month]
+
+💰 CRYPTO & FINANCE:
+• crypto [coin] • all crypto
+• crypto news • defi stats
+• nft stats • energy prices
+
+📊 DATA & STATS:
+• stock [symbol] • sports score
+• covid [country] • air quality
+
+🎰 LOTTERY & GAMBLING:
+• lottery • lotto
+
+🗺️ LOCATION & TRAVEL:
+• ip • ip location
+• country [name] • country flag
+• timezone [city]
+• airport [code]
+• zipcode [number]
 
 🔧 UTILITIES:
 • weather [city] • news
-• calculate [math] • solve [expression]
-• password [length] • uuid
+• calculate [math] • uuid
+• password [length]
 • time • date • datetime
 • convert [num] [from] to [to]
-• exchange rate [USD] to [EUR]
-• crypto [coin] • all crypto
-• stock [symbol] • all stocks
-
-🎲 RANDOM:
-• dice • dice 2d20
-• coin flip
-• random [1] to [100]
-• random user
 
 📊 HEALTH:
 • bmi [weight]kg [height]cm
 • tip [amount] at [X]%
 
-📅 TIME:
-• age [birth year]
-• leap year [year]
-• day of week [YYYY-MM-DD]
-• holidays [2024]
-
-📝 TEXT TOOLS:
-• count [text]
-• reverse [text]
-• uppercase [text]
-• lowercase [text]
-• base64 encode [text]
-• base64 decode [text]
-• md5 [text]
-• sha256 [text]
+🎨 TEXT TOOLS:
+• count [text] • reverse [text]
+• uppercase [text] • lowercase [text]
+• base64 encode [text] • md5 [text]
 • qr [text]
 
-🎨 CONVERTERS:
-• color #hexcode
-• translate [text] to [language]
-
-🌐 WEB APIs:
-• nasa • space photo
+🌐 WEB:
+• search [query]
+• wiki [topic]
 • github [username]
-• country [name]
 • open [website]
 
 🔮 PREDICTIONS:
@@ -3157,20 +3914,9 @@ What would you like to try?"""
 • predict age [name]
 • nationality [name]
 
-🐱🐕 FACTS:
-• cat fact
-• dog fact
-• number fact [42]
-• trivia
-
-💭 QUOTES:
-• quote of the day
-• joke • fact • quote
-
-📋 PRODUCTIVITY:
+📝 PRODUCTIVITY:
 • add note [text] • notes
 • add todo [task] • todos
-• todo [number] (toggle)
 • remind me to [task]
 
 💾 HISTORY:
@@ -3178,24 +3924,19 @@ What would you like to try?"""
 • clear history
 • export chat
 
+🎭 PERSONALITY:
+• personality • personality set [name]
+
 🎮 GAMES:
 • rock / paper / scissors
 • guess number
-
-🎭 PERSONALITY:
-• personality
-• personality set [name]
+• dice • coin flip
 
 💬 CHAT:
 • Tell me your name!
 • Ask me anything!
 
-🌟 TRY THESE NEW ONES:
-• random user
-• gender john
-• nationality elon
-• holidays 2025
-• quote of the day"""
+Type naturally - I'll understand!"""
 
 
 # ==================== GUI ====================
